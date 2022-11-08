@@ -27,3 +27,5 @@
     clippy::unseparated_literal_suffix
 )]
 #![deny(clippy::unwrap_used)]
+
+pub mod merkle_tree;
