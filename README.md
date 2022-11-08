@@ -1,3 +1,3 @@
 # simpleworks
 
-Arkworks made easy
+Arkworks made simple
