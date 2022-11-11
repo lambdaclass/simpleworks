@@ -21,7 +21,8 @@ ark-snark = { version = "^0.3.0", default-features = false }
 ark-serialize = { version = "^0.3.0", default-features = false }
 ark-crypto-primitives = { version = "^0.3.0", default-features = true, features = [ "r1cs" ] }
 
-blake2 = { version = "0.10" }
+# Important Note: the version of blake2 must be 0.9
+blake2 = { version = "0.9" }
 rand_chacha = { version = "0.3.1" }
 
 anyhow = "1"
