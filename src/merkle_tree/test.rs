@@ -29,6 +29,7 @@ pub fn check_leave_exists_u8<L: ToBytes>(tree: &SimpleMerkleTree, leaf: u8, path
 }
 */
 
+/*
 #[cfg(test)]
 mod tests {
     //MerkleTreeVerification, TwoToOneCRH, CRH
@@ -71,6 +72,7 @@ mod tests {
         // call marlin fn to get proof
     }
 }
+*/
 
 /*
 */

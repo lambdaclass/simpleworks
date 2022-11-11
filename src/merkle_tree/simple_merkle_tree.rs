@@ -12,6 +12,7 @@ use ark_crypto_primitives::{
 use ark_ff::ToBytes;
 use ark_marlin::{IndexProverKey, IndexVerifierKey};
 use ark_serialize::CanonicalSerialize;
+use bitvec::array::BitArray;
 
 /// A Merkle tree containing account information.
 pub struct SimpleMerkleTree {
@@ -95,7 +96,7 @@ impl SimpleMerkleTree {
         // generate the proof
         let mut rng = ark_std::test_rng();
 
-        let proof = MarlinInst::prove(&self.proving_key, circuit.clone(), &mut rng)
+        let proof = MarlinInst::prove(&self.proving_key, circuit, &mut rng)
             .map_err(|_e| anyhow!("Error generating proof"))?;
 
         let mut bytes = Vec::new();
@@ -103,5 +104,40 @@ impl SimpleMerkleTree {
             .serialize(&mut bytes)
             .map_err(|_e| anyhow!("Error serializing proof"))?;
         Ok(bytes)
+    }
+
+    pub fn verify(&self, proof: &[u8], input: u8) -> Result<bool> {
+        let one = Fr::from(1);
+        let zero = Fr::from(0);
+        let root = self.tree.root();
+        let mut input_vec = vec![root];
+
+        let bits = BitArray::<u8>::from(input);
+
+        for bit in bits.iter().by_vals() {
+            match bit {
+                false => input_vec.push(zero),
+                true => input_vec.push(one),
+            }
+        }
+
+        MarlinInst::verify(&self.verifying_key, &input_vec, &proof, &mut rng);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use bitvec::array::BitArray;
+
+    #[test]
+    fn bit_test() {
+        let bits = BitArray::<u8>::from(254);
+
+        for bit in bits.iter().by_vals() {
+            match bit {
+                false => println!("0"),
+                true => println!("1"),
+            }
+        }
     }
 }
