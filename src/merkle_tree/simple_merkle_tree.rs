@@ -10,8 +10,9 @@ use ark_crypto_primitives::{
     merkle_tree::{constraints::PathVar, MerkleTree, Path},
 };
 use ark_ff::ToBytes;
+use ark_marlin::Proof;
 use ark_marlin::{IndexProverKey, IndexVerifierKey};
-use ark_serialize::CanonicalSerialize;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use bitvec::array::BitArray;
 
 /// A Merkle tree containing account information.
@@ -63,7 +64,6 @@ impl SimpleMerkleTree {
             authentication_path: None,
         };
 
-        // index pk y vk
         // Now, try to generate the verifying key and proving key with Marlin
         let (proving_key, verifying_key) = MarlinInst::index(&universal_srs, dummy_circuit)
             .map_err(|_e| anyhow!("Error in Marlin Inst"))?;
@@ -75,6 +75,14 @@ impl SimpleMerkleTree {
             proving_key,
             verifying_key,
         })
+    }
+
+    pub fn get_merkle_path(&self, leaf_index: usize) -> Result<Path<MerkleConfig>> {
+        let path = self
+            .tree
+            .generate_proof(leaf_index)
+            .map_err(|_e| anyhow!("Error generating merkle path"))?;
+        Ok(path)
     }
 }
 
@@ -107,8 +115,8 @@ impl SimpleMerkleTree {
     }
 
     pub fn verify(&self, proof: &[u8], input: u8) -> Result<bool> {
-        let one = Fr::from(1);
-        let zero = Fr::from(0);
+        let one = Fr::from(1_i32);
+        let zero = Fr::from(0_i32);
         let root = self.tree.root();
         let mut input_vec = vec![root];
 
@@ -121,7 +129,14 @@ impl SimpleMerkleTree {
             }
         }
 
-        MarlinInst::verify(&self.verifying_key, &input_vec, &proof, &mut rng);
+        let proof = Proof::<Fr, MultiPC>::deserialize(proof)
+            .map_err(|_e| anyhow!("Error Deserializing proof"))?;
+        let mut rng = ark_std::test_rng();
+
+        let result = MarlinInst::verify(&self.verifying_key, &input_vec, &proof, &mut rng)
+            .map_err(|_e| anyhow!("Error verifying proof"))?;
+
+        Ok(result)
     }
 }
 
