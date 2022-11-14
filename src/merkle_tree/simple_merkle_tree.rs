@@ -15,7 +15,7 @@ use ark_marlin::{IndexProverKey, IndexVerifierKey};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use bitvec::array::BitArray;
 
-/// A Merkle tree containing account information.
+/// A Merkle tree of fixed size containing account information.
 pub struct SimpleMerkleTree {
     pub tree: MerkleTree<MerkleConfig>,
     pub leaf_crh_params: <LeafHash as CRH>::Parameters,
@@ -31,12 +31,12 @@ pub type SimplePath = Path<MerkleConfig>;
 pub type SimplePathVar = PathVar<MerkleConfig, LeafHashGadget, TwoToOneHashGadget, ConstraintF>;
 
 impl SimpleMerkleTree {
-    pub fn new_simple_merkle_tree<L: ToBytes>(leaves: &[L]) -> Result<Self> {
+    pub fn new<L: ToBytes>(leaves: &[L]) -> Result<Self> {
         // Let's set up an RNG for use within tests.
         // Note that this is *not* safe for any production use.
         let mut rng = ark_std::test_rng();
         let universal_srs = MarlinInst::universal_setup(100000, 25000, 300000, &mut rng)
-            .map_err(|_e| anyhow!("Error in universal setup"))?;
+            .map_err(|e| anyhow!("{:?}", e))?;
 
         // First, let's sample the public parameters for the hash functions:
         let leaf_crh_params = <LeafHash as CRH>::setup(&mut rng).map_err(|e| anyhow!("{}", e))?;
@@ -47,9 +47,22 @@ impl SimpleMerkleTree {
             MerkleTree::<MerkleConfig>::new(&leaf_crh_params, &two_to_one_crh_params, leaves)
                 .map_err(|e| anyhow!("{}", e))?;
 
-        let blank_tree: MerkleTree<MerkleConfig> =
-            MerkleTree::blank(&leaf_crh_params, &two_to_one_crh_params, 1)
-                .map_err(|e| anyhow!("{}", e))?;
+        /*
+            IMPORTANT:
+            We are creating an empty merkle tree here just to be able to derive the proving and
+            verifying keys for it, so we can store and use them later whenever we need to
+            prove/verify. This merkle tree circuit works for fixed tree heights, so different
+            heights will result in a different amount of constraints, and thus different proving and
+            verifying keys.
+        */
+        let blank_tree: MerkleTree<MerkleConfig> = MerkleTree::blank(
+            &leaf_crh_params,
+            &two_to_one_crh_params,
+            merkle_tree_height(leaves.len()),
+        )
+        .map_err(|e| anyhow!("{}", e))?;
+
+        let blank_merkle_path = blank_tree.generate_proof(0).map_err(|e| anyhow!("{}", e))?;
 
         let dummy_circuit = MerkleTreeVerificationU8 {
             // constants
@@ -61,12 +74,13 @@ impl SimpleMerkleTree {
             leaf: 0,
 
             // witness
-            authentication_path: None,
+            authentication_path: Some(blank_merkle_path),
         };
 
         // Now, try to generate the verifying key and proving key with Marlin
         let (proving_key, verifying_key) = MarlinInst::index(&universal_srs, dummy_circuit)
-            .map_err(|_e| anyhow!("Error in Marlin Inst"))?;
+            // .map_err(|_e| anyhow!("Error in Marlin Inst"))?;
+            .map_err(|e| anyhow!("{:?}", e))?;
 
         Ok(Self {
             tree,
@@ -81,7 +95,7 @@ impl SimpleMerkleTree {
         let path = self
             .tree
             .generate_proof(leaf_index)
-            .map_err(|_e| anyhow!("Error generating merkle path"))?;
+            .map_err(|e| anyhow!("{:?}", e))?;
         Ok(path)
     }
 }
@@ -105,12 +119,12 @@ impl SimpleMerkleTree {
         let mut rng = ark_std::test_rng();
 
         let proof = MarlinInst::prove(&self.proving_key, circuit, &mut rng)
-            .map_err(|_e| anyhow!("Error generating proof"))?;
+            .map_err(|e| anyhow!("{:?}", e))?;
 
         let mut bytes = Vec::new();
         proof
             .serialize(&mut bytes)
-            .map_err(|_e| anyhow!("Error serializing proof"))?;
+            .map_err(|e| anyhow!("{:?}", e))?;
         Ok(bytes)
     }
 
@@ -129,15 +143,24 @@ impl SimpleMerkleTree {
             }
         }
 
-        let proof = Proof::<Fr, MultiPC>::deserialize(proof)
-            .map_err(|_e| anyhow!("Error Deserializing proof"))?;
+        let proof = Proof::<Fr, MultiPC>::deserialize(proof).map_err(|e| anyhow!("{:?}", e))?;
         let mut rng = ark_std::test_rng();
 
         let result = MarlinInst::verify(&self.verifying_key, &input_vec, &proof, &mut rng)
-            .map_err(|_e| anyhow!("Error verifying proof"))?;
+            .map_err(|e| anyhow!("{:?}", e))?;
 
         Ok(result)
     }
+}
+
+fn merkle_tree_height(mut leaves_length: usize) -> usize {
+    let mut result = 0;
+    while leaves_length != 0 {
+        result += 1;
+        leaves_length = leaves_length >> 1;
+    }
+
+    return result;
 }
 
 #[cfg(test)]
