@@ -35,7 +35,7 @@ impl SimpleMerkleTree {
         // Let's set up an RNG for use within tests.
         // Note that this is *not* safe for any production use.
         let mut rng = ark_std::test_rng();
-        let universal_srs = MarlinInst::universal_setup(100000, 25000, 300000, &mut rng)
+        let universal_srs = MarlinInst::universal_setup(100_000, 25_000, 300_000, &mut rng)
             .map_err(|e| anyhow!("{:?}", e))?;
 
         // First, let's sample the public parameters for the hash functions:
@@ -134,9 +134,10 @@ impl SimpleMerkleTree {
         let bits = BitArray::<u8>::from(input);
 
         for bit in bits.iter().by_vals() {
-            match bit {
-                false => input_vec.push(zero),
-                true => input_vec.push(one),
+            if bit {
+                input_vec.push(one)
+            } else {
+                input_vec.push(zero)
             }
         }
 
