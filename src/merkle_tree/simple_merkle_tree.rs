@@ -15,6 +15,12 @@ use ark_marlin::{IndexProverKey, IndexVerifierKey};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use bitvec::array::BitArray;
 
+/// A membership proof for a given account.
+pub type SimplePath = Path<MerkleConfig>;
+
+/// The R1CS equivalent of the the Merkle tree path.
+pub type SimplePathVar = PathVar<MerkleConfig, LeafHashGadget, TwoToOneHashGadget, ConstraintF>;
+
 /// A Merkle tree of fixed size containing account information.
 pub struct SimpleMerkleTree {
     pub tree: MerkleTree<MerkleConfig>,
@@ -23,12 +29,6 @@ pub struct SimpleMerkleTree {
     pub proving_key: IndexProverKey<Fr, MultiPC>,
     pub verifying_key: IndexVerifierKey<Fr, MultiPC>,
 }
-
-/// A membership proof for a given account.
-pub type SimplePath = Path<MerkleConfig>;
-
-/// The R1CS equivalent of the the Merkle tree path.
-pub type SimplePathVar = PathVar<MerkleConfig, LeafHashGadget, TwoToOneHashGadget, ConstraintF>;
 
 impl SimpleMerkleTree {
     pub fn new<L: ToBytes>(leaves: &[L]) -> Result<Self> {
@@ -218,5 +218,72 @@ mod tests {
         }
         assert!(is_satisfied);
         Ok(is_satisfied)
+    }
+
+    #[test]
+    fn merkle_tree_constraints_soundness() {
+        // Let's set up an RNG for use within tests. Note that this is *not* safe
+        // for any production use.
+        let mut rng = ark_std::test_rng();
+
+        // First, let's sample the public parameters for the hash functions:
+        let leaf_crh_params = <LeafHash as CRH>::setup(&mut rng).unwrap();
+        let two_to_one_crh_params = <TwoToOneHash as TwoToOneCRH>::setup(&mut rng).unwrap();
+
+        // Next, let's construct our tree.
+        // This follows the API in https://github.com/arkworks-rs/crypto-primitives/blob/6be606259eab0aec010015e2cfd45e4f134cd9bf/src/merkle_tree/mod.rs#L156
+        // the i-th entry is the i-th leaf.
+        let tree =
+            super::SimpleMerkleTree::new(&[1u8, 2u8, 3u8, 10u8, 9u8, 17u8, 70u8, 45u8]).unwrap();
+
+        // We just mutate the first leaf
+        // the i-th entry is the i-th leaf.
+        let second_tree =
+            super::SimpleMerkleTree::new(&[4u8, 2u8, 3u8, 10u8, 9u8, 17u8, 70u8, 45u8]).unwrap();
+
+        // Now, let's try to generate a membership proof for the 5th item, i.e. 9.
+        let proof = tree.tree.generate_proof(4).unwrap(); // we're 0-indexing!
+
+        // But, let's get the root we want to verify against:
+        let wrong_root = second_tree.tree.root();
+
+        let circuit = super::MerkleTreeVerificationU8 {
+            // constants
+            leaf_crh_params,
+            two_to_one_crh_params,
+
+            // public inputs
+            root: wrong_root,
+            leaf: 9u8,
+
+            // witness
+            authentication_path: Some(proof),
+        };
+
+        // Next, let's make the constraint system!
+        let cs = ConstraintSystem::new_ref();
+        circuit.generate_constraints(cs.clone()).unwrap();
+        // Let's check whether the constraint system is satisfied
+        let is_satisfied = cs.is_satisfied().unwrap();
+        // We expect this to fail!
+        assert!(!is_satisfied);
+    }
+
+    #[test]
+    fn merkle_tree_test_proof() {
+        // Next, let's construct our tree.
+        // This follows the API in https://github.com/arkworks-rs/crypto-primitives/blob/6be606259eab0aec010015e2cfd45e4f134cd9bf/src/merkle_tree/mod.rs#L156
+        // the i-th entry is the i-th leaf.
+        let tree =
+            super::SimpleMerkleTree::new(&[1u8, 2u8, 3u8, 10u8, 9u8, 17u8, 70u8, 45u8]).unwrap();
+
+        let merkle_path = tree.tree.generate_proof(4).unwrap();
+
+        // Now, try to generate the verifying key and proving key with Marlin
+        let proof = tree.prove(9u8, merkle_path).unwrap();
+
+        let verify_ret = tree.verify(&proof, 9u8).unwrap();
+
+        assert!(verify_ret);
     }
 }
