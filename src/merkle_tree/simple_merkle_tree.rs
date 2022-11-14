@@ -78,8 +78,8 @@ impl SimpleMerkleTree {
         };
 
         // Now, try to generate the verifying key and proving key with Marlin
-        let (proving_key, verifying_key) = MarlinInst::index(&universal_srs, dummy_circuit)
-            .map_err(|e| anyhow!("{:?}", e))?;
+        let (proving_key, verifying_key) =
+            MarlinInst::index(&universal_srs, dummy_circuit).map_err(|e| anyhow!("{:?}", e))?;
 
         Ok(Self {
             tree,
@@ -97,9 +97,7 @@ impl SimpleMerkleTree {
             .map_err(|e| anyhow!("{:?}", e))?;
         Ok(path)
     }
-}
 
-impl SimpleMerkleTree {
     pub fn prove(&self, leaf: u8, merkle_path: SimplePath) -> Result<Vec<u8>> {
         let circuit = MerkleTreeVerificationU8 {
             // constants
