@@ -154,10 +154,10 @@ fn merkle_tree_height(mut leaves_length: usize) -> usize {
     let mut result = 0;
     while leaves_length != 0 {
         result += 1;
-        leaves_length = leaves_length >> 1;
+        leaves_length >>= 1_i32;
     }
 
-    return result;
+    result
 }
 
 #[cfg(test)]
