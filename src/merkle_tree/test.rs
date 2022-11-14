@@ -1,35 +1,4 @@
 /*
-pub fn check_leave_exists_u8<L: ToBytes>(tree: &SimpleMerkleTree, leaf: u8, path: Path<MerkleConfig>) -> Result<bool> {
-    // get the root
-    let root = tree.root();
-
-    let circuit = MerkleTreeVerificationU8 {
-        // constants
-        leaf_crh_params,
-        two_to_one_crh_params,
-
-        // public inputs
-        root,
-        leaf,
-
-        // witness
-        authentication_path: Some(proof),
-    };
-
-    // Next, let's make the circuit!
-    let cs = ConstraintSystem::new_ref();
-    circuit.generate_constraints(cs.clone()).unwrap();
-    // Let's check whether the constraint system is satisfied
-    let is_satisfied = cs.is_satisfied().unwrap();
-    if !is_satisfied {
-        // If it isn't, find out the offending constraint.
-        println!("{:?}", cs.which_is_unsatisfied());
-    }
-    assert!(is_satisfied);
-}
-*/
-
-/*
 #[cfg(test)]
 mod tests {
     //MerkleTreeVerification, TwoToOneCRH, CRH

@@ -162,6 +162,12 @@ fn merkle_tree_height(mut leaves_length: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use super::super::common::{LeafHash, TwoToOneHash};
+    use super::{MerkleConfig, Path, SimpleMerkleTree, ToBytes};
+    use crate::merkle_tree::merkle_tree_verification_u8::MerkleTreeVerificationU8;
+    use anyhow::{anyhow, Result};
+    use ark_crypto_primitives::crh::{TwoToOneCRH, CRH};
+    use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystem};
     use bitvec::array::BitArray;
 
     #[test]
@@ -174,5 +180,43 @@ mod tests {
                 true => println!("1"),
             }
         }
+    }
+
+    pub fn check_leave_exists_u8<L: ToBytes>(
+        tree: &SimpleMerkleTree,
+        leaf: u8,
+        path: Path<MerkleConfig>,
+    ) -> Result<bool> {
+        // get the root
+        let root = tree.tree.root();
+        let mut rng = ark_std::test_rng();
+        let leaf_crh_params = <LeafHash as CRH>::setup(&mut rng).map_err(|e| anyhow!("{}", e))?;
+        let two_to_one_crh_params =
+            <TwoToOneHash as TwoToOneCRH>::setup(&mut rng).map_err(|e| anyhow!("{}", e))?;
+
+        let circuit = MerkleTreeVerificationU8 {
+            // constants
+            leaf_crh_params,
+            two_to_one_crh_params,
+
+            // public inputs
+            root,
+            leaf,
+
+            // witness
+            authentication_path: Some(path),
+        };
+
+        // Next, let's make the circuit!
+        let cs = ConstraintSystem::new_ref();
+        circuit.generate_constraints(cs.clone()).unwrap();
+        // Let's check whether the constraint system is satisfied
+        let is_satisfied = cs.is_satisfied().unwrap();
+        if !is_satisfied {
+            // If it isn't, find out the offending constraint.
+            println!("{:?}", cs.which_is_unsatisfied());
+        }
+        assert!(is_satisfied);
+        Ok(is_satisfied)
     }
 }
