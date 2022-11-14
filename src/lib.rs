@@ -26,4 +26,8 @@
     clippy::try_err,
     clippy::unseparated_literal_suffix
 )]
-#![deny(clippy::unwrap_used)]
+#![deny(clippy::unwrap_used, clippy::expect_used)]
+#![allow(clippy::module_inception, clippy::module_name_repetitions)]
+
+pub mod marlin;
+pub mod merkle_tree;
