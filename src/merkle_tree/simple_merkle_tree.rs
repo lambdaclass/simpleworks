@@ -79,7 +79,6 @@ impl SimpleMerkleTree {
 
         // Now, try to generate the verifying key and proving key with Marlin
         let (proving_key, verifying_key) = MarlinInst::index(&universal_srs, dummy_circuit)
-            // .map_err(|_e| anyhow!("Error in Marlin Inst"))?;
             .map_err(|e| anyhow!("{:?}", e))?;
 
         Ok(Self {
