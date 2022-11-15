@@ -11,7 +11,7 @@ use ark_r1cs_std::{
 use ark_relations::r1cs::{Namespace, SynthesisError};
 use derivative::Derivative;
 
-use crate::schnorr::Signature;
+use super::schnorr::Signature;
 
 #[derive(Derivative)]
 #[derivative(

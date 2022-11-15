@@ -8,7 +8,7 @@ use ark_r1cs_std::{
 };
 use ark_relations::r1cs::{Namespace, SynthesisError};
 
-use crate::schnorr::Parameters;
+use super::schnorr::Parameters;
 
 #[derive(Clone)]
 pub struct ParametersVar<C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>>

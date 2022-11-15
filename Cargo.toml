@@ -29,3 +29,6 @@ anyhow = "1"
 tracing = { version = "0.1", default-features = false, features = [ "attributes" ] }
 tracing-subscriber = { version = "0.3" }
 bitvec = "1"
+
+derivative = { version = "2.0", features = ["use_core"] }
+digest = "0.9"

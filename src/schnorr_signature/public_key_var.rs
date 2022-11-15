@@ -1,4 +1,4 @@
-use crate::schnorr::PublicKey;
+use super::schnorr::PublicKey;
 use ark_ec::ProjectiveCurve;
 use ark_ff::Field;
 use ark_r1cs_std::{bits::uint8::UInt8, prelude::*};
