@@ -19,6 +19,7 @@ pub struct Schnorr<C: ProjectiveCurve> {
 
 #[derive(Derivative)]
 #[derivative(Clone(bound = "C: ProjectiveCurve"), Debug)]
+#[allow(clippy::let_underscore_must_use)]
 pub struct Parameters<C: ProjectiveCurve> {
     pub generator: C::Affine,
     pub salt: Option<[u8; 32]>,

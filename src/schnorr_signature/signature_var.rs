@@ -18,6 +18,7 @@ use super::schnorr::Signature;
     Debug(bound = "C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>"),
     Clone(bound = "C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>")
 )]
+#[allow(clippy::let_underscore_must_use)]
 pub struct SignatureVar<C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>>
 where
     for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
