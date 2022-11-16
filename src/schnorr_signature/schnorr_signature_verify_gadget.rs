@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 
 pub struct SchnorrSignatureVerifyGadget<C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>>
 where
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     #[doc(hidden)]
     _group: PhantomData<*const C>,
@@ -28,7 +28,7 @@ impl<C, GC> SigVerifyGadget<Schnorr<C>, ConstraintF<C>> for SchnorrSignatureVeri
 where
     C: ProjectiveCurve,
     GC: CurveVar<C, ConstraintF<C>>,
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     type ParametersVar = ParametersVar<C, GC>;
     type PublicKeyVar = PublicKeyVar<C, GC>;
@@ -51,8 +51,8 @@ where
         claimed_prover_commitment += &public_key_times_verifier_challenge;
 
         let mut hash_input = Vec::new();
-        if parameters.salt.is_some() {
-            hash_input.extend_from_slice(parameters.salt.as_ref().unwrap());
+        if let Some(salt) = parameters.salt.as_ref() {
+            hash_input.extend_from_slice(salt);
         }
         hash_input.extend_from_slice(&public_key.pub_key.to_bytes()?);
         hash_input.extend_from_slice(&claimed_prover_commitment.to_bytes()?);

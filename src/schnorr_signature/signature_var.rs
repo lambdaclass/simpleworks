@@ -20,7 +20,7 @@ use super::schnorr::Signature;
 )]
 pub struct SignatureVar<C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>>
 where
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     pub(crate) prover_response: Vec<UInt8<ConstraintF<C>>>,
     pub(crate) verifier_challenge: Vec<UInt8<ConstraintF<C>>>,
@@ -32,7 +32,7 @@ impl<C, GC> AllocVar<Signature<C>, ConstraintF<C>> for SignatureVar<C, GC>
 where
     C: ProjectiveCurve,
     GC: CurveVar<C, ConstraintF<C>>,
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     fn new_variable<T: Borrow<Signature<C>>>(
         cs: impl Into<Namespace<ConstraintF<C>>>,
@@ -72,7 +72,7 @@ impl<C, GC> ToBytesGadget<ConstraintF<C>> for SignatureVar<C, GC>
 where
     C: ProjectiveCurve,
     GC: CurveVar<C, ConstraintF<C>>,
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     fn to_bytes(&self) -> Result<Vec<UInt8<ConstraintF<C>>>, SynthesisError> {
         let prover_response_bytes = self.prover_response.to_bytes()?;

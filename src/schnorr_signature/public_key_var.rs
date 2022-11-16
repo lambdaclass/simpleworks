@@ -14,9 +14,10 @@ type ConstraintF<C> = <<C as ProjectiveCurve>::BaseField as Field>::BasePrimeFie
     Debug(bound = "C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>"),
     Clone(bound = "C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>")
 )]
+#[allow(clippy::let_underscore_must_use)]
 pub struct PublicKeyVar<C: ProjectiveCurve, GC: CurveVar<C, ConstraintF<C>>>
 where
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     pub(crate) pub_key: GC,
     #[doc(hidden)]
@@ -27,7 +28,7 @@ impl<C, GC> AllocVar<PublicKey<C>, ConstraintF<C>> for PublicKeyVar<C, GC>
 where
     C: ProjectiveCurve,
     GC: CurveVar<C, ConstraintF<C>>,
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     fn new_variable<T: Borrow<PublicKey<C>>>(
         cs: impl Into<Namespace<ConstraintF<C>>>,
@@ -46,7 +47,7 @@ impl<C, GC> EqGadget<ConstraintF<C>> for PublicKeyVar<C, GC>
 where
     C: ProjectiveCurve,
     GC: CurveVar<C, ConstraintF<C>>,
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     #[inline]
     fn is_eq(&self, other: &Self) -> Result<Boolean<ConstraintF<C>>, SynthesisError> {
@@ -78,7 +79,7 @@ impl<C, GC> ToBytesGadget<ConstraintF<C>> for PublicKeyVar<C, GC>
 where
     C: ProjectiveCurve,
     GC: CurveVar<C, ConstraintF<C>>,
-    for<'a> &'a GC: GroupOpsBounds<'a, C, GC>,
+    for<'group_ops_bounds> &'group_ops_bounds GC: GroupOpsBounds<'group_ops_bounds, C, GC>,
 {
     fn to_bytes(&self) -> Result<Vec<UInt8<ConstraintF<C>>>, SynthesisError> {
         self.pub_key.to_bytes()

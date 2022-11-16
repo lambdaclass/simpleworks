@@ -53,7 +53,7 @@ impl RandomOracle for RO {
     fn evaluate(_: &Self::Parameters, input: &[u8]) -> Result<Self::Output, Error> {
         let mut h = b2s::new();
         h.update(input);
-        let mut result = [0u8; 32];
+        let mut result = [0_u8; 32];
         result.copy_from_slice(&h.finalize());
         Ok(result)
     }

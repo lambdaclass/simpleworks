@@ -96,8 +96,8 @@ where
             // Hash everything to get verifier challenge.
             // e := H(salt || pubkey || r || msg);
             let mut hash_input = Vec::new();
-            if parameters.salt != None {
-                hash_input.extend_from_slice(&parameters.salt.unwrap());
+            if let Some(salt) = parameters.salt {
+                hash_input.extend_from_slice(&salt);
             }
             hash_input.extend_from_slice(&to_bytes![sk.public_key]?);
             hash_input.extend_from_slice(&to_bytes![prover_commitment]?);
@@ -105,7 +105,7 @@ where
 
             let hash_digest = Blake2s::digest(&hash_input);
             assert!(hash_digest.len() >= 32);
-            let mut verifier_challenge = [0u8; 32];
+            let mut verifier_challenge = [0_u8; 32];
             verifier_challenge.copy_from_slice(&hash_digest);
 
             (random_scalar, verifier_challenge)
@@ -144,21 +144,23 @@ where
 
         // e = H(salt, kG, msg)
         let mut hash_input = Vec::new();
-        if parameters.salt != None {
-            hash_input.extend_from_slice(&parameters.salt.unwrap());
+        if let Some(salt) = parameters.salt {
+            hash_input.extend_from_slice(&salt);
         }
         hash_input.extend_from_slice(&to_bytes![pk]?);
         hash_input.extend_from_slice(&to_bytes![claimed_prover_commitment]?);
         hash_input.extend_from_slice(message);
 
         // cast the hash output to get e
-        let obtained_verifier_challenge = &Blake2s::digest(&hash_input)[..];
+        let obtained_verifier_challenge = &*Blake2s::digest(&hash_input);
 
         // The signature is valid iff the computed verifier challenge is the same as the one
         // provided in the signature
         Ok(verifier_challenge == obtained_verifier_challenge)
     }
 
+    // TODO: Implement
+    #[allow(clippy::todo)]
     fn randomize_public_key(
         _pp: &Self::Parameters,
         _public_key: &Self::PublicKey,
@@ -167,6 +169,8 @@ where
         todo!()
     }
 
+    // TODO: Implement
+    #[allow(clippy::todo)]
     fn randomize_signature(
         _pp: &Self::Parameters,
         _signature: &Self::Signature,
@@ -179,8 +183,8 @@ where
 pub fn bytes_to_bits(bytes: &[u8]) -> Vec<bool> {
     let mut bits = Vec::with_capacity(bytes.len() * 8);
     for byte in bytes {
-        for i in 0..8 {
-            let bit = (*byte >> (8 - i - 1)) & 1;
+        for i in 0_i32..8_i32 {
+            let bit = (*byte >> (8_i32 - i - 1_i32)) & 1;
             bits.push(bit == 1);
         }
     }
