@@ -15,7 +15,6 @@
     clippy::float_cmp_const,
     clippy::fn_to_numeric_cast_any,
     clippy::indexing_slicing,
-    clippy::let_underscore_must_use,
     clippy::map_err_ignore,
     clippy::single_char_lifetime_names,
     clippy::str_to_string,
@@ -27,7 +26,8 @@
     clippy::unseparated_literal_suffix
 )]
 #![deny(clippy::unwrap_used, clippy::expect_used)]
-#![allow(clippy::module_inception, clippy::module_name_repetitions)]
+#![allow(clippy::module_inception, clippy::module_name_repetitions, clippy::let_underscore_must_use)]
 
 pub mod marlin;
 pub mod merkle_tree;
+pub mod schnorr_signature;
