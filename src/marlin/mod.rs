@@ -18,7 +18,7 @@ pub fn generate_rand() -> StdRng {
     ark_std::test_rng()
 }
 
-pub fn generate_universar_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
+pub fn generate_universal_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
     MarlinInst::universal_setup(100000, 25000, 300000, rng)
         .map_err(|_e| anyhow!("Error generating universal srs"))
 }
