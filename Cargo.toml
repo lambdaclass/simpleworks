@@ -19,11 +19,14 @@ ark-std = { version = "^0.3.0", default-features = false }
 ark-relations = { version = "^0.3.0", default-features = false  }
 ark-poly = { version = "^0.3.0", default-features = false  }
 ark-poly-commit = { version = "^0.3.0", default-features = false  }
-ark-marlin = { git = "https://github.com/arkworks-rs/marlin.git" }
 ark-r1cs-std = { version = "^0.3.0", default-features = false }
 ark-snark = { version = "^0.3.0", default-features = false }
 ark-serialize = { version = "^0.3.0", default-features = false }
 ark-crypto-primitives = { version = "^0.3.0", default-features = true, features = [ "r1cs" ] }
+
+# we use our fork of marlin crate, branch "use-constraint-system-directly"
+ark-marlin = { git = "https://github.com/Entropy1729/marlin.git", branch = "use-constraint-system-directly" }
+rand = { version = "0.8", default-features = false, features = ["std_rng"]}
 
 # Important Note: the version of blake2 must be 0.9
 blake2 = { version = "0.9" }
