@@ -27,9 +27,9 @@ pub fn generate_proof(
     universal_srs: &UniversalSRS,
     rng: &mut StdRng,
     constraint_system: ConstraintSystemRef,
-) -> Result<(Vec<u8>, Vec<u8>)> {
+) -> Result<Vec<u8>> {
     // Try to generate the verifying key and proving key with Marlin
-    let (index_proving_key, index_verifying_key) =
+    let (index_proving_key, _index_verifying_key) =
         MarlinInst::index_from_constraint_system(universal_srs, constraint_system.clone())
             .map_err(|_e| anyhow!("Error in index_from_constraint_system"))?;
 
@@ -42,10 +42,5 @@ pub fn generate_proof(
         .serialize(&mut bytes_proof)
         .map_err(|_e| anyhow!("Error serializing proof"))?;
 
-    let mut bytes_verifying_key = Vec::new();
-    index_verifying_key
-        .serialize(&mut bytes_verifying_key)
-        .map_err(|_e| anyhow!("Error serializing verifying_key"))?;
-
-    Ok((bytes_verifying_key, bytes_proof))
+    Ok(bytes_proof)
 }
