@@ -3,6 +3,10 @@ name = "simpleworks"
 version = "0.1.0"
 edition = "2021"
 
+[profile.test]
+opt-level = 3
+debug-assertions = true
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -32,3 +36,15 @@ bitvec = "1"
 
 derivative = { version = "2.0", features = ["use_core"] }
 digest = "0.9"
+
+[[example]]
+name = "manual-constraints"
+
+[[example]]
+name = "test-circuit"
+
+[[example]]
+name = "merkle-tree"
+
+[[example]]
+name = "schnorr-signature"

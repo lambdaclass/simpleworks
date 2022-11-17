@@ -26,8 +26,12 @@
     clippy::unseparated_literal_suffix
 )]
 #![deny(clippy::unwrap_used, clippy::expect_used)]
-#![allow(clippy::module_inception, clippy::module_name_repetitions, clippy::let_underscore_must_use)]
+#![allow(
+    clippy::module_inception,
+    clippy::module_name_repetitions,
+    clippy::let_underscore_must_use
+)]
 
 pub mod marlin;
-pub mod merkle_tree;
+// pub mod merkle_tree;
 pub mod schnorr_signature;

@@ -1,8 +1,10 @@
 use super::{
     blake2s::{ROGadget, RandomOracleGadget},
-    Blake2sParametersVar,
-    parameters_var::ParametersVar, public_key_var::PublicKeyVar, schnorr::Schnorr,
-    signature_var::SignatureVar, ConstraintF,
+    parameters_var::ParametersVar,
+    public_key_var::PublicKeyVar,
+    schnorr::Schnorr,
+    signature_var::SignatureVar,
+    Blake2sParametersVar, ConstraintF,
 };
 use ark_crypto_primitives::signature::SigVerifyGadget;
 use ark_ec::ProjectiveCurve;
