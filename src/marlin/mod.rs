@@ -14,7 +14,7 @@ pub type MarlinInst = Marlin<Fr, MultiPC, FS>;
 pub type UniversalSRS = ark_marlin::UniversalSRS<Fr, MultiPC>;
 pub type ConstraintSystemRef = ark_relations::r1cs::ConstraintSystemRef<Fr>;
 
-/// Return a cryptographically secure random number generator that uses the ChaCha algorithm.
+/// Return a pseudorandom number generator.
 /// 
 pub fn generate_rand() -> StdRng {
     ark_std::test_rng()
@@ -33,8 +33,8 @@ pub fn generate_universal_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
         .map_err(|_e| anyhow!("Error generating universal srs"))
 }
 
-///  Return a serialized version of the verifying key and proving key generated with Marlin and the universal_srs.
-/// 
+///  Return the serialized version of the marlin proof for the given circuit/constraint system.
+///   
 /// # Parameters.
 /// - `universal_srs` - A universal prover and verifier keys for the argument system.
 /// - `rng` - A pseudorandom number generator (PRNG).
