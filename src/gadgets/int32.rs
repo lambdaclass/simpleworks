@@ -1,3 +1,4 @@
+use anyhow::{anyhow, bail, Result};
 use ark_ff::{Field, One, PrimeField, Zero};
 use ark_r1cs_std::{
     boolean::AllocatedBool,
@@ -52,8 +53,8 @@ impl<F: Field> Int32<F> {
 
         bits.iter_mut().for_each(|bit| {
             // If last bit is one, push one.
-            *bit = Boolean::constant((tmp & 1) == 1);
-            tmp >>= 1;
+            *bit = Boolean::constant((tmp & 1_i32) == 1_i32);
+            tmp >>= 1_i32;
         });
 
         Self {
@@ -65,7 +66,7 @@ impl<F: Field> Int32<F> {
     /// Perform modular addition of `operands`.
     ///
     /// The user must ensure that overflow does not occur.
-    pub fn addmany(operands: &[Self]) -> Result<Self, SynthesisError>
+    pub fn addmany(operands: &[Self]) -> Result<Self>
     where
         F: PrimeField,
     {
@@ -149,7 +150,7 @@ impl<F: Field> Int32<F> {
 
         // Allocate each bit_gadget of the result
         let mut coeff = F::one();
-        let mut i = 0;
+        let mut i = 0_i32;
         while max_value != BigInt::zero() {
             // Allocate the bit_gadget
             let b = AllocatedBool::new_witness(cs.clone(), || {
@@ -165,8 +166,8 @@ impl<F: Field> Int32<F> {
 
             result_bits.push(b.into());
 
-            max_value >>= 1;
-            i += 1;
+            max_value >>= 1_i32;
+            i += 1_i32;
             coeff.double_in_place();
         }
 
@@ -175,18 +176,15 @@ impl<F: Field> Int32<F> {
 
         // Discard carry bits that we don't care about
         result_bits.truncate(I32_SIZE_IN_BITS);
-        let bits = match TryFrom::try_from(result_bits) {
-            Ok(bits) => bits,
-            Err(_e) => todo!(),
-        };
+        let bits = TryFrom::try_from(result_bits).map_err(|e| anyhow!("{:?}", e))?;
 
         match modular_value {
             Some(Ok(modular_value)) => Ok(Self {
                 bits,
                 value: Some(modular_value),
             }),
-            Some(Err(_e)) => todo!(),
-            None => todo!(),
+            Some(Err(e)) => bail!("{e}"),
+            None => bail!("The result of the modular addition between Int32 is None"),
         }
     }
 }
@@ -206,7 +204,7 @@ impl<ConstraintF: Field> AllocVar<i32, ConstraintF> for Int32<ConstraintF> {
             values
                 .iter_mut()
                 .enumerate()
-                .for_each(|(i, v)| *v = Some((val >> i) & 1 == 1));
+                .for_each(|(i, v)| *v = Some((val >> i) & 1_i32 == 1_i32));
         }
 
         let mut bits = [Boolean::FALSE; 32];
@@ -277,13 +275,13 @@ mod tests {
     #[test]
     fn test_int8_from_bits_to_bits() -> Result<(), SynthesisError> {
         let cs = ConstraintSystem::<Fr>::new_ref();
-        let byte_val = 0b0111_0001;
+        let byte_val = 0b0111_0001_i32;
         let byte =
             Int32::new_witness(ark_relations::ns!(cs, "alloc value"), || Ok(byte_val)).unwrap();
         let bits = byte.to_bits_le()?;
 
         for (i, bit) in bits.iter().enumerate() {
-            assert_eq!(bit.value()?, (byte_val >> i) & 1 == 1)
+            assert_eq!(bit.value()?, (byte_val >> i) & 1_i32 == 1_i32)
         }
         Ok(())
     }

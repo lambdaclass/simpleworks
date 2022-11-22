@@ -1,3 +1,4 @@
+use anyhow::{anyhow, bail, Result};
 use ark_ff::{Field, One, PrimeField, Zero};
 use ark_r1cs_std::{
     boolean::AllocatedBool,
@@ -65,7 +66,7 @@ impl<F: Field> Int8<F> {
     /// Perform modular addition of `operands`.
     ///
     /// The user must ensure that overflow does not occur.
-    pub fn addmany(operands: &[Self; OPERANDS_LEN]) -> Result<Self, SynthesisError>
+    pub fn addmany(operands: &[Self; OPERANDS_LEN]) -> Result<Self>
     where
         F: PrimeField,
     {
@@ -175,14 +176,15 @@ impl<F: Field> Int8<F> {
 
         // Discard carry bits that we don't care about
         result_bits.truncate(I8_SIZE_IN_BITS);
-        let bits = TryFrom::try_from(result_bits).map_err(|_e| SynthesisError::MissingCS)?;
+        let bits = TryFrom::try_from(result_bits).map_err(|e| anyhow!("{:?}", e))?;
 
         match modular_value {
             Some(Ok(modular_value)) => Ok(Self {
                 bits,
                 value: Some(modular_value),
             }),
-            _ => unreachable!(),
+            Some(Err(e)) => bail!("{e}"),
+            None => bail!("The result of the modular addition between Int8 is None"),
         }
     }
 }
