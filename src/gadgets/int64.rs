@@ -33,7 +33,8 @@ impl<F: Field> Int64<F> {
     /// ```
     /// # fn main() -> Result<(), ark_relations::r1cs::SynthesisError> {
     /// // We'll use the BLS12-381 scalar field for our constraints.
-    /// use ark_test_curves::bls12_381::Fr;
+    /// use simpleworks::gadgets::int64::Int64;
+    /// use ark_bls12_381::Fr;
     /// use ark_relations::r1cs::*;
     /// use ark_r1cs_std::prelude::*;
     ///
@@ -270,19 +271,134 @@ mod tests {
     use super::Int64;
     use ark_bls12_381::Fr;
     use ark_r1cs_std::{prelude::AllocVar, R1CSVar, ToBitsGadget};
-    use ark_relations::r1cs::{ConstraintSystem, SynthesisError};
+    use ark_relations::r1cs::ConstraintSystem;
 
     #[test]
-    fn test_int8_from_bits_to_bits() -> Result<(), SynthesisError> {
+    fn test_int8_from_bits_to_bits() {
         let cs = ConstraintSystem::<Fr>::new_ref();
         let byte_val = 0b01110001;
         let byte =
             Int64::new_witness(ark_relations::ns!(cs, "alloc value"), || Ok(byte_val)).unwrap();
-        let bits = byte.to_bits_le()?;
+        let bits = byte.to_bits_le().unwrap();
 
         for (i, bit) in bits.iter().enumerate() {
-            assert_eq!(bit.value()?, (byte_val >> i) & 1 == 1)
+            assert_eq!(bit.value().unwrap(), (byte_val >> i) & 1 == 1)
         }
-        Ok(())
+    }
+
+    #[test]
+    fn test_addition_with_positive_operands() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = 1;
+        let primitive_augend = 1;
+        let primitive_result = primitive_addend + primitive_augend;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_ok());
+        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+    }
+
+    #[test]
+    fn test_addition_with_negative_operands() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = -1;
+        let primitive_augend = -1;
+        let primitive_result = primitive_addend + primitive_augend;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_ok());
+        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+    }
+
+    #[test]
+    fn test_addition_with_positive_addend_negative_augend_positive_result() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = 2;
+        let primitive_augend = -1;
+        let primitive_result = primitive_addend + primitive_augend;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_ok());
+        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+    }
+
+    #[test]
+    fn test_addition_with_negative_addend_positive_augend_positive_result() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = -1;
+        let primitive_augend = 2;
+        let primitive_result = primitive_addend + primitive_augend;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_ok());
+        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+    }
+
+    #[test]
+    fn test_addition_with_positive_addend_negative_augend_negative_result() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = 1;
+        let primitive_augend = -2;
+        let primitive_result = primitive_addend + primitive_augend;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_ok());
+        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+    }
+
+    #[test]
+    fn test_addition_with_negative_addend_positive_augend_negative_result() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = -2;
+        let primitive_augend = 1;
+        let primitive_result = primitive_addend + primitive_augend;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_ok());
+        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+    }
+
+    #[test]
+    fn test_addition_with_overflow() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = i64::max_value();
+        let primitive_augend = 1;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_addition_with_underflow() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_addend = -i64::max_value();
+        let primitive_augend = -2;
+        let addend_var = Int64::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
+        let augend_var = Int64::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
+        
+        let result = Int64::addmany(&[addend_var, augend_var]);
+        
+        assert!(result.is_err());
     }
 }
