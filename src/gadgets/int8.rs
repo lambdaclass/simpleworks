@@ -271,8 +271,7 @@ mod tests {
     use super::Int8;
     use ark_bls12_381::Fr;
     use ark_r1cs_std::{prelude::{AllocVar, EqGadget}, R1CSVar, ToBitsGadget};
-    use ark_relations::r1cs::{ConstraintSystem, ConstraintLayer, TracingMode};
-    use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+    use ark_relations::r1cs::ConstraintSystem;
 
     #[test]
     fn test_int8_from_bits_to_bits() {
