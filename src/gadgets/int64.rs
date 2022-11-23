@@ -12,7 +12,10 @@ use ark_relations::{
 use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::cast::ToPrimitive;
-use std::borrow::Borrow;
+use std::{
+    borrow::Borrow,
+    ops::{Add, Sub},
+};
 
 const I64_SIZE_IN_BITS: usize = 64;
 const OPERANDS_LEN: usize = 2;
@@ -135,7 +138,14 @@ impl<F: Field> Int64<F> {
                 << (I64_SIZE_IN_BITS
                     .to_u32()
                     .ok_or("I64_SIZE_IN_BITS value cannot be represented as u32.")?);
-            (v.mod_floor(&modulus))
+
+            let shift = BigInt::from(1_u64)
+                << ((I64_SIZE_IN_BITS - 1)
+                    .to_u32()
+                    .ok_or("I64_SIZE_IN_BITS value cannot be represented as u32.")?);
+
+            (v.add(shift.clone()).mod_floor(&modulus))
+                .sub(shift)
                 .to_i64()
                 .ok_or("Modular value cannot be represented as i64.")
         });
@@ -219,7 +229,6 @@ impl<ConstraintF: Field> AllocVar<i64, ConstraintF> for Int64<ConstraintF> {
 
 impl<ConstraintF: Field> EqGadget<ConstraintF> for Int64<ConstraintF> {
     fn is_eq(&self, other: &Self) -> Result<Boolean<ConstraintF>, SynthesisError> {
-        println!("IS_EQ {:?} == {:?}", self.bits, other.bits);
         self.bits.as_ref().is_eq(&other.bits)
     }
 

@@ -10,8 +10,12 @@ use ark_relations::{
     r1cs::{ConstraintSystemRef, LinearCombination, Namespace, SynthesisError, Variable},
 };
 use num_bigint::BigInt;
+use num_integer::Integer;
 use num_traits::cast::ToPrimitive;
-use std::borrow::Borrow;
+use std::{
+    borrow::Borrow,
+    ops::{Add, Sub},
+};
 
 const I16_SIZE_IN_BITS: usize = 16;
 const OPERANDS_LEN: usize = 2;
@@ -134,7 +138,14 @@ impl<F: Field> Int16<F> {
                 << (I16_SIZE_IN_BITS
                     .to_u32()
                     .ok_or("I16_SIZE_IN_BITS value cannot be represented as u32.")?);
-            (v % modulus)
+
+            let shift = BigInt::from(1_u64)
+                << ((I16_SIZE_IN_BITS - 1)
+                    .to_u32()
+                    .ok_or("I16_SIZE_IN_BITS value cannot be represented as u32.")?);
+
+            (v.add(shift.clone()).mod_floor(&modulus))
+                .sub(shift)
                 .to_i16()
                 .ok_or("Modular value cannot be represented as i16.")
         });

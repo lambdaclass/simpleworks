@@ -279,7 +279,10 @@ impl<F: Field> R1CSVar<F> for Int8<F> {
 mod tests {
     use super::Int8;
     use ark_bls12_381::Fr;
-    use ark_r1cs_std::{prelude::{AllocVar, EqGadget}, R1CSVar, ToBitsGadget};
+    use ark_r1cs_std::{
+        prelude::{AllocVar, EqGadget},
+        R1CSVar, ToBitsGadget,
+    };
     use ark_relations::r1cs::ConstraintSystem;
 
     #[test]
