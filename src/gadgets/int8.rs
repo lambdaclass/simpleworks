@@ -270,8 +270,9 @@ impl<F: Field> R1CSVar<F> for Int8<F> {
 mod tests {
     use super::Int8;
     use ark_bls12_381::Fr;
-    use ark_r1cs_std::{prelude::AllocVar, R1CSVar, ToBitsGadget};
-    use ark_relations::r1cs::ConstraintSystem;
+    use ark_r1cs_std::{prelude::{AllocVar, EqGadget}, R1CSVar, ToBitsGadget};
+    use ark_relations::r1cs::{ConstraintSystem, ConstraintLayer, TracingMode};
+    use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 
     #[test]
     fn test_int8_from_bits_to_bits() {
@@ -287,6 +288,34 @@ mod tests {
     }
 
     #[test]
+    fn test_positive() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_value = 1;
+        let primitive_other_value = 1;
+        let value_var = Int8::new_witness(ark_relations::ns!(cs, "value_var"), || Ok(primitive_value)).unwrap();
+        let other_value_var = Int8::new_witness(ark_relations::ns!(cs, "other_value_var"), || Ok(primitive_other_value)).unwrap();
+        
+        assert!(value_var.enforce_equal(&other_value_var).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_value, value_var.value().unwrap());
+        assert_eq!(primitive_other_value, other_value_var.value().unwrap());
+    }
+
+    #[test]
+    fn test_negative() {
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let primitive_xxx = -1;
+        let primitive_yyy = -1;
+        let xxx = Int8::new_witness(ark_relations::ns!(cs, "xxx"), || Ok(primitive_xxx)).unwrap();
+        let yyy = Int8::new_witness(ark_relations::ns!(cs, "yyy"), || Ok(primitive_yyy)).unwrap();
+        
+        assert!(xxx.enforce_equal(&yyy).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_xxx, xxx.value().unwrap());
+        assert_eq!(primitive_yyy, yyy.value().unwrap());
+    }
+
+    #[test]
     fn test_addition_with_positive_operands() {
         let cs = ConstraintSystem::<Fr>::new_ref();
         let primitive_addend = 1;
@@ -295,10 +324,12 @@ mod tests {
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int8::addmany(&[addend_var, augend_var]);
+        let result_from_primitive_var = Int8::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
+        let result = Int8::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
@@ -310,77 +341,97 @@ mod tests {
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int8::addmany(&[addend_var, augend_var]);
-        
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        let result_from_primitive_var = Int8::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
+        let result = Int8::addmany(&[addend_var, augend_var]).unwrap();
+
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_positive_addend_negative_augend_positive_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+
         let primitive_addend = 2;
         let primitive_augend = -1;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int8::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int8::addmany(&[addend_var, augend_var]);
+        let result = Int8::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_negative_addend_positive_augend_positive_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+
         let primitive_addend = -1;
         let primitive_augend = 2;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int8::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int8::addmany(&[addend_var, augend_var]);
+        let result = Int8::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_positive_addend_negative_augend_negative_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = 1;
         let primitive_augend = -2;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int8::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int8::addmany(&[addend_var, augend_var]);
+        let result = Int8::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_negative_addend_positive_augend_negative_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = -2;
         let primitive_augend = 1;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int8::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int8::addmany(&[addend_var, augend_var]);
+        let result = Int8::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_overflow() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+
         let primitive_addend = i8::max_value();
         let primitive_augend = 1;
+
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
@@ -392,8 +443,10 @@ mod tests {
     #[test]
     fn test_addition_with_underflow() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+
         let primitive_addend = -i8::max_value();
         let primitive_augend = -2;
+
         let addend_var = Int8::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int8::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         

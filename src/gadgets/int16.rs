@@ -270,7 +270,7 @@ impl<F: Field> R1CSVar<F> for Int16<F> {
 mod tests {
     use super::Int16;
     use ark_bls12_381::Fr;
-    use ark_r1cs_std::{prelude::AllocVar, R1CSVar, ToBitsGadget};
+    use ark_r1cs_std::{prelude::{AllocVar, EqGadget}, R1CSVar, ToBitsGadget};
     use ark_relations::r1cs::ConstraintSystem;
 
     #[test]
@@ -289,98 +289,124 @@ mod tests {
     #[test]
     fn test_addition_with_positive_operands() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+
         let primitive_addend = 1;
         let primitive_augend = 1;
         let primitive_result = primitive_addend + primitive_augend;
+
+        let result_from_primitive_var = Int16::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int16::addmany(&[addend_var, augend_var]);
+        let result = Int16::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_negative_operands() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = -1;
         let primitive_augend = -1;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int16::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int16::addmany(&[addend_var, augend_var]);
+        let result = Int16::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_positive_addend_negative_augend_positive_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = 2;
         let primitive_augend = -1;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int16::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int16::addmany(&[addend_var, augend_var]);
+        let result = Int16::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_negative_addend_positive_augend_positive_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = -1;
         let primitive_augend = 2;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int16::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int16::addmany(&[addend_var, augend_var]);
+        let result = Int16::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_positive_addend_negative_augend_negative_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = 1;
         let primitive_augend = -2;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int16::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int16::addmany(&[addend_var, augend_var]);
+        let result = Int16::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_negative_addend_positive_augend_negative_result() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = -2;
         let primitive_augend = 1;
         let primitive_result = primitive_addend + primitive_augend;
+        
+        let result_from_primitive_var = Int16::new_witness(ark_relations::ns!(cs, "result"), || Ok(primitive_result)).unwrap();
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
-        let result = Int16::addmany(&[addend_var, augend_var]);
+        let result = Int16::addmany(&[addend_var, augend_var]).unwrap();
         
-        assert!(result.is_ok());
-        assert_eq!(primitive_result, result.unwrap().value().unwrap());
+        assert!(result_from_primitive_var.enforce_equal(&result).is_ok());
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(primitive_result, result.value().unwrap());
     }
 
     #[test]
     fn test_addition_with_overflow() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = i16::max_value();
         let primitive_augend = 1;
+        
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
@@ -392,8 +418,10 @@ mod tests {
     #[test]
     fn test_addition_with_underflow() {
         let cs = ConstraintSystem::<Fr>::new_ref();
+        
         let primitive_addend = -i16::max_value();
         let primitive_augend = -2;
+        
         let addend_var = Int16::new_witness(ark_relations::ns!(cs, "addend"), || Ok(primitive_addend)).unwrap();
         let augend_var = Int16::new_witness(ark_relations::ns!(cs, "augend"), || Ok(primitive_augend)).unwrap();
         
