@@ -1,6 +1,6 @@
-use super::{UInt64Gadget, AddressGadget};
+use super::{AddressGadget, UInt64Gadget};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Record {
     address: AddressGadget,
     gates: UInt64Gadget,
