@@ -1,6 +1,6 @@
 use super::UInt64Gadget;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Record {
     gates: UInt64Gadget,
 }
