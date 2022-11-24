@@ -6,9 +6,7 @@ use ark_r1cs_std::{
 use ark_relations::{
     r1cs::{ConstraintSystemRef, Namespace, SynthesisError},
 };
-use std::{borrow::Borrow, panic::UnwindSafe};
-
-// use crate::errors::SimpleError;
+use std::borrow::Borrow;
 
 /// Represents an interpretation of 8 `Boolean` objects as an
 /// unsigned integer.
@@ -18,15 +16,6 @@ pub struct Address<F: Field> {
     pub(crate) bytes: Vec<UInt8<F>>,
     pub(crate) value: Option<[u8; 63]>,
 }
-
-impl<F: Field> UnwindSafe for Address<F> {}
-
-// impl<F: Field> Address<F> {
-//     pub fn value(not_self: &Self) -> Result<String, SimpleError> {
-//         std::panic::catch_unwind(|| R1CSVar::value(not_self));
-//         Ok(String::new())
-//     }
-// }
 
 impl<ConstraintF: Field> AllocVar<[u8; 63], ConstraintF> for Address<ConstraintF> {
     fn new_variable<T: Borrow<[u8; 63]>>(
@@ -87,9 +76,7 @@ impl<F: Field> R1CSVar<F> for Address<F> {
 
         debug_assert_eq!(self.value, Some(primitive_bytes));
 
-        // TODO: We think that is better to unwrap here instead of raising the
-        // wrong error (of type SynthesisError).
-        #[allow(clippy::unwrap_used)]
-        Ok(std::str::from_utf8(&primitive_bytes).unwrap().to_owned())
+        // TODO: Wrong error is returned.
+        Ok(std::str::from_utf8(&primitive_bytes).map_err(|_e| SynthesisError::AssignmentMissing)?.to_owned())
     }
 }
