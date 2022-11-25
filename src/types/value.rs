@@ -36,10 +36,13 @@ impl TryFrom<&String> for SimpleworksValueType {
             let v = value.trim_end_matches("u128");
             let value_int = v.parse::<u128>().map_err(|e| anyhow!("{}", e))?;
             return Ok(SimpleworksValueType::U128(value_int));
-        } else if value.ends_with("address") {
-            let v = value.trim_end_matches("address");
-            // @@@@@
-            return todo!();
+        } else if value.starts_with("aleo1") {
+            let v = value.trim_start_matches("aleo1");
+            let mut address = [0_u8; 63];
+            for (sender_address_byte, address_string_byte) in address.iter_mut().zip(v.as_bytes()) {
+                *sender_address_byte = *address_string_byte;
+            }
+            return Ok(SimpleworksValueType::Address(address));
         }
         bail!("Unknown type")
     }
