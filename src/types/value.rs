@@ -9,6 +9,7 @@ pub enum SimpleworksValueType {
     U32(u32),
     U64(u64),
     U128(u128),
+    Address([u8; 63]),
 }
 
 impl TryFrom<&String> for SimpleworksValueType {
@@ -35,6 +36,10 @@ impl TryFrom<&String> for SimpleworksValueType {
             let v = value.trim_end_matches("u128");
             let value_int = v.parse::<u128>().map_err(|e| anyhow!("{}", e))?;
             return Ok(SimpleworksValueType::U128(value_int));
+        } else if value.ends_with("address") {
+            let v = value.trim_end_matches("address");
+            // @@@@@
+            return todo!();
         }
         bail!("Unknown type")
     }
@@ -48,6 +53,7 @@ impl fmt::Display for SimpleworksValueType {
             SimpleworksValueType::U32(v) => write!(f, "{v}u32"),
             SimpleworksValueType::U64(v) => write!(f, "{v}u64"),
             SimpleworksValueType::U128(v) => write!(f, "{v}u128"),
+            SimpleworksValueType::Address(v) => write!(f, "{}address", hex::encode(v)),
         }
     }
 }
