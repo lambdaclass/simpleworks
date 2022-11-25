@@ -85,7 +85,9 @@ mod tests {
         // Address
         let mut address = [0_u8; 63];
         let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
-        for (sender_address_byte, address_string_byte) in address.iter_mut().zip(address_str.as_bytes()) {
+        for (sender_address_byte, address_string_byte) in
+            address.iter_mut().zip(address_str.as_bytes())
+        {
             *sender_address_byte = *address_string_byte;
         }
         let v = SimpleworksValueType::Address(address);
