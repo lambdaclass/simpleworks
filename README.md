@@ -16,7 +16,11 @@ cargo test --release --example schnorr-signature
 cargo test --release --example simple-payments
 ```
 
-You can check out the code for them under the `examples` directory, and a thorugh explanation of:
-- `test-circuit`
-- `manual-constraints`
-- [`merkle-tree`](https://github.com/Entropy1729/docs/tree/main/mdbook/src/arkworks)
+You can check out the code for them under the `examples` directory, and a thorugh explanation of `test-circuit`, `manual-constraints` and `merkle-tree` in the `docs` section. With [mdbook](https://rust-lang.github.io/mdBook/) installed, you can do 
+
+```
+cd docs
+mdbook serve --open
+```
+
+to read them locally.
