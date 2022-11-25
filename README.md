@@ -1,7 +1,9 @@
 # Simpleworks
 
-Arkworks made simple
+Arkworks made simple for us: the non cryptographer software plumbers.
 
+This is still a WIP. We will publish many more examples and documentation in the upcoming weeks.
+ 
 ## Arkworks documentation and examples
 
 There are five examples that serve as an introduction to arkworks. You can run them by doing:
