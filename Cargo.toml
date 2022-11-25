@@ -40,6 +40,7 @@ bitvec = "1"
 
 derivative = { version = "2.0", features = ["use_core"] }
 digest = "0.9"
+hex = "0.4.3"
 
 [[example]]
 name = "manual-constraints"
