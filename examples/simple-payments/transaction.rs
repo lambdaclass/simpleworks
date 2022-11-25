@@ -119,7 +119,7 @@ impl Transaction {
             })?;
 
         // Generate the proof.
-        let proof = MarlinInst::prove(&index_pk, circuit.clone(), rng)
+        let proof = MarlinInst::prove(&index_pk, circuit, rng)
             .map_err(|_| anyhow!("Error generating the Marlin proof"))?;
 
         let marlin_verify = MarlinInst::verify(&index_vk, &[], &proof, rng)
