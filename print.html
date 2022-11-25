@@ -1,0 +1,793 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>docs</title>
+                <meta name="robots" content="noindex" />
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Gadgets</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="gadgets/gadgets.html"><strong aria-hidden="true">2.1.</strong> Primitive Types</a></li><li class="chapter-item expanded "><a href="gadgets/complex_gadgets.html"><strong aria-hidden="true">2.2.</strong> Complex Gadgets/Merkle Tree</a></li></ol></li><li class="chapter-item expanded "><a href="crypto_primitives.html"><strong aria-hidden="true">3.</strong> Crypto Primitives</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">docs</h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="zk-programming-using-arkworks"><a class="header" href="#zk-programming-using-arkworks">ZK programming using Arkworks</a></h1>
+<h2 id="arithmetic-circuits"><a class="header" href="#arithmetic-circuits">Arithmetic circuits</a></h2>
+<p>In the process of generating ZK-SNARKs for arbitrary computation there is one key step, called <code>arithmetization</code>. This is where this computation, written in some high level language like Aleo instructions, is turned into an <code>arithmetic circuit</code>, a graph where each node is an operation (addition, multiplication, etc) and each edge/arrow is some input or output to/from that gate. Below is an example:</p>
+<p><img src="./img/arithmetic_circuit.png" alt="Simple arithmetic circuit" /></p>
+<p>Here, the circuit has four inputs $a_1$, $a_2$, $a_3$, and $a_4$ and two outputs $a_5$ and $a_6$, that encode the following computation:</p>
+<p>$$
+a_5 = (a_1 + 7a_2) * (a_2 - a_3) \
+a_6 = (a_2 - a_3) * (a_4 + 1)
+$$</p>
+<h2 id="r1cs"><a class="header" href="#r1cs">R1CS</a></h2>
+<p>Arithmetic circuits can be expressed in a different but equivalent way, called a <code>Rank One Constraint System</code>. We're not going to go into much detail about it, but the high level idea is an <code>R1CS</code> is an equation of the form</p>
+<p>$$
+(\sum a_k x_k) * (\sum b_k x_k) = (\sum c_k x_k)
+$$</p>
+<p>where the $x_k$ can roughly be thought of as the inputs to the circuit. More compactly, this can be written as</p>
+<p>$$
+Ax * Bx = Cx
+$$</p>
+<p>for some appropriate <code>A</code>, <code>B</code> and <code>C</code>.</p>
+<p>Arkworks circuits are expressed in <code>R1CS</code> form, so a circuit is just referred to as a <code>constraint system</code> or just a set of <code>constraints</code>.</p>
+<h2 id="arkworks-circuit-api"><a class="header" href="#arkworks-circuit-api">Arkworks circuit API</a></h2>
+<p>Arkworks exposes an API to create circuits through the <code>ark_r1cs_std</code> and <code>ark_relations</code> packages. In Arkworks, a circuit is any struct that implements the <code>ConstraintSynthetizer</code> trait:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait ConstraintSynthesizer&lt;F: Field&gt; {
+    /// Drives generation of new constraints inside `cs`.
+    fn generate_constraints(self, cs: ConstraintSystemRef&lt;F&gt;) -&gt; crate::r1cs::Result&lt;()&gt;;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Because all calculations inside a circuit are done on a finite field, this trait is generic over it.</p>
+<p>Implementing <code>ConstraintSynthetizer</code> amounts to implementing the function <code>generate_constraints</code>. To give an idea of how this works, let's go through an example.</p>
+<h3 id="simple-circuit"><a class="header" href="#simple-circuit">Simple circuit</a></h3>
+<p>We are going to write a circuit that just takes two numbers as input and checks if they are equal. We define a struct called <code>TestCircuit</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+pub struct TestCircuit {
+    /// Private input
+    pub a: u8,
+    /// Private input
+    pub b: u8,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>As the comments suggest, circuit inputs can be either <code>public</code> or <code>private</code>. Private inputs are hidden to the verifier, i.e., after constructing a proof, the verifier does not have access to them; the proof itself proves that we know a value for it that satisfies the circuit without revealing it.</p>
+<p>Now we need to write the constraints for this circuit:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_r1cs_std::prelude::*;
+use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystemRef, SynthesisError};
+
+impl ConstraintSynthesizer&lt;ark_ed_on_bls12_381::Fq&gt; for TestCircuit {
+    fn generate_constraints(
+        self,
+        cs: ConstraintSystemRef&lt;ark_ed_on_bls12_381::Fq&gt;,
+    ) -&gt; Result&lt;(), SynthesisError&gt; {
+        let a = UInt8::new_witness(ark_relations::ns!(cs, &quot;a&quot;), || Ok(self.a))?;
+
+        let b = UInt8::new_witness(ark_relations::ns!(cs, &quot;b&quot;), || Ok(self.b))?;
+
+        a.enforce_equal(&amp;b)?;
+
+        Ok(())
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>For the generic <code>F</code> type, we are using a finite field defined in the <code>ark_ed_on_bls12_381</code> crate. This is a crate implementing the <code>bls 12-381</code> elliptic curve that we'll use later on for proving.</p>
+<p>To make our lives easier for now, we are using what Arkworks calls a <code>Gadget</code>. These are pre-generated circuits that we can use as building blocks for coding our constraints. You can sort of think of them as a standard library for circuits. In our example, we are using the <code>UInt8</code> gadget, a way of defining and manipulating unsigned 8 bit integers in this context. Later on we will be showing how to do this without gadgets, defining our constraint manually.</p>
+<p>With the <code>UInt8</code> gadget, we define two private inputs (also called <code>witnesses</code>) <code>a</code> and <code>b</code>, and then call the <code>enforce_equal</code> function between them (again, this function is provided by the gadget, we'll see below how to enforce this constraint by hand).</p>
+<p>To instantiate a circuit and check if the constraints are satisfied for a given set of inputs, we do the following:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystem};
+
+let circuit = TestCircuit { a: 1, b: 1 };
+
+let cs = ConstraintSystem::new_ref();
+circuit.generate_constraints(cs.clone()).unwrap();
+
+let is_satisfied = cs.is_satisfied().unwrap();
+assert!(is_satisfied);
+<span class="boring">}
+</span></code></pre></pre>
+<p>Doing the same with the <code>a</code> and <code>b</code> inputs being different should fail.</p>
+<h3 id="constraints-without-gadgets"><a class="header" href="#constraints-without-gadgets">Constraints without gadgets</a></h3>
+<p>Let's write the same <code>TestCircuit</code> as before, but without using the <code>UInt8</code> gadget. The struct definition is the same, but now the constraints are defined as follows:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl ConstraintSynthesizer&lt;ark_ed_on_bls12_381::Fq&gt; for TestCircuit {
+    fn generate_constraints(
+        self,
+        cs: ConstraintSystemRef&lt;ark_ed_on_bls12_381::Fq&gt;,
+    ) -&gt; Result&lt;(), SynthesisError&gt; {
+        let a = cs.new_witness_variable(|| {
+            Fq::try_from(self.a).map_err(|_| SynthesisError::AssignmentMissing)
+        })?;
+
+        let b = cs.new_witness_variable(|| {
+            Fq::try_from(self.b).map_err(|_| SynthesisError::AssignmentMissing)
+        })?;
+
+        cs.enforce_constraint(lc!(), lc!(), lc!() + (ark_ed_on_bls12_381::Fq::one(), a) - (ark_ed_on_bls12_381::Fq::one(), b))?;
+
+        Ok(())
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>To create the two private inputs, we now use the <code>new_witness_variable</code> method for the <code>ConstraintSystem</code> we get as an argument when generating constraints. Because every calculation inside a circuit actually happens in a finite field, to create the inputs we manually cast our <code>a</code> and <code>b</code> values to be field elements. Of course, the <code>UInt8</code> gadget just does the same behind the scenes (the gadget treats a <code>u8</code> as an array of 8 booleans using the <code>Boolean</code> gadget, which in turn calls <a href="https://github.com/arkworks-rs/r1cs-std/blob/master/src/bits/boolean.rs#L22">this</a> to do the conversion).</p>
+<p>Having created our inputs, we now manually define our constraint with the <code>enforce_constraint</code> function. This expects three arguments called <code>a</code>, <code>b</code>, and <code>c</code>, which correspond to the <code>A</code>, <code>B</code>, and <code>C</code> values defined in the high-level <code>R1CS</code> equation we talked about above. Each one of them is of type <code>LinearCombination&lt;F&gt;</code>, which is nothing more than a <code>Vec&lt;(F, Variable)&gt;</code> (variable being either a constant, public/private input or another linear combination). This is just a way of encoding a sum of the form:</p>
+<p>$$
+\sum a_k x_k
+$$</p>
+<p>The $a_k$s are of type <code>F</code>, the $x_k$s are variables.</p>
+<p>Going back to our example, we defined our constraint by passing <code>a</code>, <code>b</code>, and <code>c</code> as:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_std::One;
+
+a = lc!()
+b = lc!()
+c = lc!() + (ark_ed_on_bls12_381::Fq::one(), a) - (ark_ed_on_bls12_381::Fq::one(), b)
+<span class="boring">}
+</span></code></pre></pre>
+<p>The macro <code>lc!()</code> is provided by Arkworks and just generates an empty linear combination, i.e., zero. For our <code>c</code>, we are substracting from variable</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>(ark_ed_on_bls12_381::Fq::one(), a)
+<span class="boring">}
+</span></code></pre></pre>
+<p>the variable</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>(ark_ed_on_bls12_381::Fq::one(), b)
+<span class="boring">}
+</span></code></pre></pre>
+<p>which is just a complicated way of saying <code>a - b</code> inside our finite field. Putting it all together, our constraint is</p>
+<p>$$
+0 + 0 = a - b
+$$</p>
+<p>a.k.a.</p>
+<p>$$
+a = b
+$$</p>
+<p>Note that this is not the only way of writing this constraint, in our case we could have also defined</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>a = (ark_ed_on_bls12_381::Fq::one(), a) - (ark_ed_on_bls12_381::Fq::one(), b)
+b = (ark_ed_on_bls12_381::Fq::one(), 1)
+c = lc!()
+<span class="boring">}
+</span></code></pre></pre>
+<p>encoding the equation</p>
+<p>$$
+(a - b) * 1 = 0
+$$</p>
+<p>As is clear from this example, it is much easier to work with gadgets if you can, as they abstract a lot of details from the programmer.</p>
+<h2 id="proving-and-verifying-our-computation-with-the-marlin-crate"><a class="header" href="#proving-and-verifying-our-computation-with-the-marlin-crate">Proving and verifying our computation with the Marlin crate</a></h2>
+<p>With our circuit in hand, what we need to create a ZK-SNARK over it is a <code>proving system</code>, a way to obtain a proof that we ran the circuit with the given inputs (both public and private) and it produced the given outputs (again, both public and private). TODO: check if outputs are actually a part of the circuit/proof API or if they are a higher level thing.</p>
+<p>Arkworks provides packages for two different proving systems: <code>Groth16</code> and <code>Marlin</code>. For the next example we'll be using <code>Marlin</code>, which Aleo uses for its blockchain.</p>
+<p>The API for both generating and verifying proofs is incredibly simple:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_marlin::{Marlin, SimpleHashFiatShamirRng};
+
+use ark_bls12_381::{Bls12_381, Fr};
+use ark_poly::univariate::DensePolynomial;
+use ark_poly_commit::marlin_pc::MarlinKZG10;
+use blake2::Blake2s;
+use rand_chacha::ChaChaRng;
+type MultiPC = MarlinKZG10&lt;Bls12_381, DensePolynomial&lt;Fr&gt;&gt;;
+type FS = SimpleHashFiatShamirRng&lt;Blake2s, ChaChaRng&gt;;
+type MarlinInst = Marlin&lt;Fr, MultiPC, FS&gt;;
+
+#[test]
+fn prove_and_verify() {
+    let rng = &amp;mut ark_std::test_rng();
+    let universal_srs = MarlinInst::universal_setup(100, 25, 300, rng).unwrap();
+
+    let circuit = super::TestCircuit { a: 1, b: 1 };
+    let (index_pk, index_vk) = MarlinInst::index(&amp;universal_srs, circuit.clone()).unwrap();
+
+    let proof = MarlinInst::prove(&amp;index_pk, circuit.clone(), rng).unwrap();
+
+    let proof_verifies : bool = MarlinInst::verify(&amp;index_vk, &amp;[], &amp;proof, rng).unwrap();
+    assert!(proof_verifies);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Before going over the code, we'll cover how proofs are carried out.</p>
+<p>In Marlin and other proving systems, generating and verifying proofs for a given circuit requires having previously sampled a <code>proving key</code> and a <code>verifying key</code>, respectively. You can think of the proving key as something that homomorphically encrypts the circuit, and the verifying key as something that allows to check whether the circuit computation is correct, without having to run it entirely or decrypt it.</p>
+<p>The need for a proving/verifying key-pair for every circuit is an inconvenience, since in a setting like the Aleo blockchain there could be thousands of programs (which are ultimately circuits); executing or verifying any of them would require knowledge of these keys that the program's owner generated. This prompted the need for an agreed-upon, deterministic way of deriving these keys, which is the entire point of <code>Marlin</code> as a proving system.</p>
+<p>In <code>Marlin</code>, all proving and verifying keys are deterministically derived from a so called Universal Structured Reference String (SRS), sometimes also called Common Reference String (CRS). This Universal string is generated in a <code>Universal Setup</code>, a scheme in which lots of different people contribute to the SRS. It's crucial that multiple people participate, since this process is essentially nothing more than sampling a (huge) random value, which the SRS is derived from. In a sense, the SRS is like a global public key for every circuit created over it, derived from some private key. Knowledge of this private key allows anyone to forge proofs at will, so it needs to be a secret to everyone in the system.</p>
+<p>Back to our code, the first thing we do is sample a universal SRS for our system. In a context like Aleo, this would have already happened and the SRS would be a public value already known to us. The <code>universal_setup</code> function takes a bunch of arguments that control the maximum number of constraints and variables any circuit derived from it can have. Here we keep the values low, but in a real world scenario they would be huge.</p>
+<p>With our SRS, we instantiate our circuit and call the <code>index</code> function, passing the <code>universal_srs</code> in addition to our circuit to derive our proving and verifying keys. The reason it's called <code>index</code> goes back to the Marlin paper, but it refers to the key sampling.</p>
+<p>Having our keys, all it takes to produce a proof is calling <code>prove</code> passing the <code>proving_key</code>, our circuit and a source of randomness. To verify it, in addition to the <code>verifying_key</code>, our circuit and a source of randomness, we pass a list with the public inputs for the circuit. The <code>verify</code> function will return a <code>Result&lt;bool&gt;</code>.</p>
+<h2 id="deeper-dive-into-marlin"><a class="header" href="#deeper-dive-into-marlin">Deeper dive into Marlin</a></h2>
+<p>In the preceding section we swept under the rug a very important part of the code, namely these three imports:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>type MultiPC = MarlinKZG10&lt;Bls12_381, DensePolynomial&lt;Fr&gt;&gt;;
+type FS = SimpleHashFiatShamirRng&lt;Blake2s, ChaChaRng&gt;;
+type MarlinInst = Marlin&lt;Fr, MultiPC, FS&gt;;
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>Marlin</code> struct used for proving and verifying has three generic types which have to be provided when instantiating it:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Marlin&lt;F: PrimeField, PC: PolynomialCommitment&lt;F, DensePolynomial&lt;F&gt;&gt;, FS: FiatShamirRng&gt;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Let's explain what they are. At a high level, <code>Marlin</code> is composed of three distinct parts:</p>
+<ul>
+<li>A Polynomial Interactive Oracle Proof (PIOP), a way of constructing a polynomial for our proof of the computation (i.e. our circuit/R1CS) and a protocol for interactively verifying it.</li>
+<li>A Polynomial commitment scheme, a method for commiting to the polynomial above without revealing it to the verifier, while allowing them to prod into it a bit to convince them that it is correct.</li>
+<li>A source of true randomness required by the <code>Fiat-Shamir heuristic</code>, which is a way of turning the interactive verification protocol defined by the PIOP into a non-interactive one. This is really important, as without it verification would require live communication between prover and verifier.</li>
+</ul>
+<p>Of these three things, the <code>Marlin</code> struct allows us to choose different implementations of the last two. The PIOP is fixed, but the choice of polynomial commitment scheme and source of randomness for <code>Fiat-Shamir</code> can be chosen; that's what the <code>PC</code> and <code>FS</code> generic types are for. The <code>F</code> one is simply the choice of finite field, required by the <code>PolynomialCommitment</code> scheme choice, which uses elliptic curve cryptography underneath.</p>
+<p>For our example, we are using polynomial commitment and Fiat-Shamir <code>rng</code> implementations given by Arkworks. <code>MarlinKZG10</code> is a version of the popular <code>KZG</code> commitment scheme; other common PC choices are <code>FRI</code> or <code>DARK</code>.</p>
+<h2 id="useful-references"><a class="header" href="#useful-references">Useful References</a></h2>
+<ul>
+<li><a href="https://github.com/arkworks-rs/r1cs-tutorial">Arkworks R1CS tutorial</a></li>
+<li><a href="https://github.com/webb-tools/zero-knowledge-gadgets">ZK Gadgets using Arkworks</a></li>
+<li><a href="https://github.com/noir-lang/arkworks_backend">Noir's Arkworks Backend</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gadgets"><a class="header" href="#gadgets">Gadgets</a></h1>
+<p>Gadgets are essentially libraries that give you access to common types and operations when defining circuits.</p>
+<p>Gadgets implement the traits <code>R1CSVar</code>, <code>AllocVar</code>, <code>EqGadget</code>, <code>ToBitsGadget</code>, <code>ToBytesGadget</code>, and <code>CondSelectGadget</code>, which provide common methods used when defining circuits.</p>
+<h3 id="allocvar"><a class="header" href="#allocvar"><code>AllocVar</code></a></h3>
+<p>Lets you instantiate constant values or public/private inputs of the type implementing it on your circuit. It provides the methods <code>new_variable</code>, <code>new_constant</code>, <code>new_input</code> and <code>new_witness</code>.</p>
+<h3 id="r1csvar"><a class="header" href="#r1csvar"><code>R1CSVar</code></a></h3>
+<p>Provides three methods that are usually used underneath when generating constraints: </p>
+<ul>
+<li><code>cs()</code> returns the underlying constraint system.</li>
+<li><code>is_constant()</code> is self-explanatory.</li>
+<li><code>value()</code> returns the underlying value of the variable.</li>
+</ul>
+<h3 id="eqgadget"><a class="header" href="#eqgadget"><code>EqGadget</code></a></h3>
+<p>Has various methods for both checking or enforcing equality or inequality: <code>is_eq</code>, <code>is_neq</code>, <code>enforce_equal</code>, etc.</p>
+<h3 id="tobitsgadget"><a class="header" href="#tobitsgadget"><code>ToBitsGadget</code></a></h3>
+<p>Has methods to convert the type to bits. Note that &quot;bits&quot; here does not mean regular 8 bit integers, but rather bits inside a circuit, i.e., zeroes or ones in the underlying finite field (they are represented as <code>Boolean</code>s, a gadget we'll talk about below). Methods include <code>to_bits_le</code>, <code>to_bits_be</code>, etc.</p>
+<h3 id="tobytesgadget"><a class="header" href="#tobytesgadget"><code>ToBytesGadget</code></a></h3>
+<p>Gives you the <code>to_bytes()</code> method to  convert the type to a byte array (i.e. <code>Vec</code>). Once again, note that &quot;byte&quot; here does not mean the regular byte you're used to, but rather a byte representation in a finite field. This representation is provided by the <code>UInt8</code> gadget that we'll discuss below.</p>
+<h3 id="condselectgadget"><a class="header" href="#condselectgadget"><code>CondSelectGadget</code></a></h3>
+<p>Lets you generate constraints to select between to values. There's <code>conditionally_select(cond, true_value, false_value)</code> (if <code>cond</code> is <code>true</code> it returns <code>true_value</code>, otherwise it returns <code>false_value</code>) and <code>conditionally_select_power_of_two_vector(position, values)</code> (returns an element of <code>values</code> whose index in represented by <code>position</code>. <code>position</code> is an array of boolean that represents an unsigned integer in big endian order). I don't know exactly where they're used for, they seem fairly low level.</p>
+<h2 id="boolean"><a class="header" href="#boolean"><code>Boolean</code></a></h2>
+<p>Boolean type inside a circuit/R1CS. Example:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_r1cs_std::bits::boolean::Boolean;
+use ark_ed_on_bls12_381::Fq;
+
+let a = Boolean::new_input(cs, || Ok(true))?;
+a.enforce_equal(&amp;Boolean::TRUE)?;
+
+let not_a = Boolean::not(&amp;a);
+not_a.enforce_equal(&amp;Boolean::FALSE)?;
+
+let result = a.and(&amp;not_a)?;
+result.enforce_equal(&amp;Boolean::TRUE)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>For a more interesting one, here's sample code from arkworks that enforces the validity of a given transaction.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Validate that the transaction signature and amount is correct.
+tx.validate(
+    &amp;ledger_params,
+    &amp;sender_acc_info,
+    &amp;sender_pre_path,
+    &amp;sender_post_path,
+    &amp;recipient_acc_info,
+    &amp;recipient_pre_path,
+    &amp;recipient_post_path,
+    &amp;initial_root,
+    &amp;final_root,
+)?.enforce_equal(&amp;Boolean::TRUE)
+<span class="boring">}
+</span></code></pre></pre>
+<p>The <code>validate</code> method is ultimately a very complex circuit using a variety of gadgets for Merkle proof and Schnorr signature verification that returns a <code>Boolean</code>.</p>
+<p>This gadget is also a building block for pretty much all other types, as it's the finite field representation of a bit. This way, types like <code>UInt8</code> (see below) are implemented as arrays of <code>Boolean</code>s underneath.</p>
+<h2 id="uint8"><a class="header" href="#uint8"><code>UInt8</code></a></h2>
+<p>Unsigned 8 bit integer type for circuits. Example:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_r1cs_std::bits::uint8::UInt8;
+
+let a = UInt8::new_input(cs, || Ok(1))?;
+
+let result = a.xor(&amp;a)?;
+let zero = UInt8::constant(0);
+result.enforce_equal(&amp;zero)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>As hinted above, it's important to understand that, underneath, a <code>UInt8</code> is nothing more than an array of finite field elements. This has consequences for its use. For example, the <code>verify</code> function provided by the <code>Marlin</code> crate expects to be passed an array of the corresponding circuit's public inputs. Because this API is pretty low level and operations all happen in a elliptic curve over a finite field, the elements of this array are expected to be of type <code>F: Field</code>.</p>
+<p>However, when defining a circuit, you will usually be using high level constructs like <code>UInt8</code>. If you define a public input to be of type <code>UInt8</code>, when verifying you are responsible for making the conversion from it to <code>&amp;[F]</code>. Note that this conversion is not simply using the <code>from</code> function given by finite fields, i.e., if your public inputs is a <code>UInt8</code> of value <code>1</code>, you can't do</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>F::from(1)
+<span class="boring">}
+</span></code></pre></pre>
+<p>as the representation is actually</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let one = F::from(1);
+let zero = F::from(0);
+let public_input = vec![one, zero, zero, zero, zero, zero, zero, zero]
+<span class="boring">}
+</span></code></pre></pre>
+<p>There's a <code>to_bits_le</code> method defined by the <code>ToBitsGadget</code> that <code>UInt8</code> implements, but it gives you a <code>Vec&lt;Boolean&lt;F&gt;&gt;</code>, not a <code>Vec&lt;F&gt;</code>. Another extra conversion needs to be made from <code>Boolean</code> to <code>F</code>.</p>
+<h2 id="uint16-uint32-uint64-and-uint128"><a class="header" href="#uint16-uint32-uint64-and-uint128"><code>UInt16</code>, <code>UInt32</code>, <code>UInt64</code> and <code>UInt128</code></a></h2>
+<p>Pretty self-explanatory, though they are defined through macros. Example:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use ark_r1cs_std::bits::uint16::UInt16;
+
+let a = UInt16::new_input(cs, || Ok(1))?;
+let b = UInt16::new_witness(cs, || Ok(2))?;
+let c = UInt16::constant(3);
+
+let result = UInt16::addmany(&amp;[a, b]).unwrap();
+result.enforce_equal(&amp;c)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>addmany</code> is an associated function (the rust equivalent of a Java static method) defined for these types. For some reason, it's not defined for <code>UInt8</code>. Note that the default behaviour for <code>addmany</code> (at least when compiling in <code>release</code>) is to overflow without warning. That is, the result of <code>u16::MAX + 1</code> is simply <code>0</code>.</p>
+<h2 id="lower-level-cryptographic-types"><a class="header" href="#lower-level-cryptographic-types">Lower level cryptographic types</a></h2>
+<p>TODO: There's stuff for fields, elliptic curves, pairings, polynomials and polynomial evaluations.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="complex-gadgetsmerkle-tree-example"><a class="header" href="#complex-gadgetsmerkle-tree-example">Complex Gadgets/Merkle Tree Example</a></h1>
+<p>So far we've been discussing the circuit equivalent of primitive types that all programming languages support. Eventually, the need for custom types (i.e. structs) arises.</p>
+<p>For this, let's go through an example of how this would work. The following will be taken from the <code>MerkleTree</code> example <a href="https://github.com/Entropy1729/simpleworks/tree/main/examples/merkle-tree">here</a>. The goal is to create a circuit that, given a merkle root, leaf and a path to the leaf, decides whether the leaf belongs to the tree or not.</p>
+<p>So we don't reinvent the wheel, we are going to use a fixed height merkle tree implementation provided by the <code>crypto-primitives</code> package in arkworks. This gives us a struct </p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct MerkleTree&lt;P: Config&gt;
+<span class="boring">}
+</span></code></pre></pre>
+<p>where the <code>Config</code> is just a generic type with the hash functions used for the tree (yes, it's functions in plural, check the <a href="gadgets/../crypto_primitives.html">crypto primitives section</a> for details on this). This struct provides us with methods to instantiate a merkle tree with 
+a given list of leaves:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Returns a new merkle tree. `leaves.len()` should be power of two.
+pub fn new&lt;L: ToBytes&gt;(
+    leaf_hash_param: &amp;LeafParam&lt;P&gt;,
+    two_to_one_hash_param: &amp;TwoToOneParam&lt;P&gt;,
+    leaves: &amp;[L],
+) -&gt; Result&lt;Self, crate::Error&gt;
+<span class="boring">}
+</span></code></pre></pre>
+<p>and to generate a merkle path for a given leaf:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Returns the authentication path from leaf at `index` to root.
+pub fn generate_proof(&amp;self, index: usize) -&gt; Result&lt;Path&lt;P&gt;, crate::Error&gt;
+<span class="boring">}
+</span></code></pre></pre>
+<p>For our example, this is enough. So far we have a regular merkle tree Rust struct, but what we're looking for is an arkworks circuit to generate and verify ZK proofs of inclusion for this tree. What we'll do is create a second struct to represent this circuit:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+pub struct MerkleTreeVerification {
+    // These are constants that will be embedded into the circuit
+    pub leaf_crh_params: &lt;LeafHash as CRH&gt;::Parameters,
+    pub two_to_one_crh_params: &lt;TwoToOneHash as TwoToOneCRH&gt;::Parameters,
+
+    // These are the public inputs to the circuit.
+    pub root: Root,
+    pub leaf: u8,
+
+    // This is the private witness to the circuit.
+    pub authentication_path: Option&lt;SimplePath&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Don't worry too much about the <code>leaf_crh_params</code> and <code>two_to_one_crh_params</code>, they're just variables related to the hash functions being used.</p>
+<p>If we recall the <a href="gadgets/../overview.html#simple-circuit">overview</a>, to turn this struct into a circuit all we have to do is implement the <code>generate_constraints</code> method for the <code>ConstraintSynthetizer</code> trait. This pattern is a very common one throughout arkworks and it's the same one we used in the overview example, the idea is that the fields of our circuit struct are its constant, public and private inputs exposed as regular rust types.</p>
+<p>In turn, each of these types has a corresponding <code>R1CS</code> equivalent, which allows creating constant, public or private inputs inside a circuit out of these regular rust types. The simplest example of this is the <code>UInt8</code> gadget we've already covered; it lets you define unsigned 8 bit integers inside a circuit, which is exactly what we need for our leaf public input.</p>
+<p>The idea behind this pattern is to give an API to users that entirely abstracts them from the circuit logic. By providing a <code>MerkleTreeVerification</code> struct with regular types as fields, users of the circuit don't need to know what gadgets or constraints are.</p>
+<p>All that being said, our <code>generate_constraints</code> method looks like this:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn generate_constraints(
+        self,
+        cs: ConstraintSystemRef&lt;ConstraintF&gt;,
+    ) -&gt; Result&lt;(), SynthesisError&gt; {
+        // First, we allocate the public inputs
+        let root = RootVar::new_input(ark_relations::ns!(cs, &quot;root_var&quot;), || Ok(&amp;self.root))?;
+        let leaf = UInt8::new_input(ark_relations::ns!(cs, &quot;leaf_var&quot;), || Ok(&amp;self.leaf))?;
+
+        // Then, we allocate the public parameters as constants:
+        let leaf_crh_params = LeafHashParamsVar::new_constant(cs.clone(), &amp;self.leaf_crh_params)?;
+        let two_to_one_crh_params =
+            TwoToOneHashParamsVar::new_constant(cs.clone(), &amp;self.two_to_one_crh_params)?;
+
+        // Finally, we allocate our path as a private witness variable:
+        let path = SimplePathVar::new_witness(ark_relations::ns!(cs, &quot;path_var&quot;), || {
+            Ok(self.authentication_path.as_ref().unwrap())
+        })?;
+
+        let leaf_bytes = vec![leaf; 1];
+
+        let is_member = path.verify_membership(
+            &amp;leaf_crh_params,
+            &amp;two_to_one_crh_params,
+            &amp;root,
+            &amp;leaf_bytes.as_slice(),
+        )?;
+
+        is_member.enforce_equal(&amp;Boolean::TRUE)?;
+
+        Ok(())
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>First we allocate a <code>RootVar</code> public input, which is the <code>R1CS</code> equivalent of a merkle root. This is a type provided by arkworks, which underneath implements the <code>AllocVar</code> trait discussed above. As a general rule, if a type ends with <code>Var</code>, then it's most likely the <code>R1CS</code> equivalent of a regular type. The value for our <code>RootVar</code> public input is <code>&amp;self.root</code>, i.e., the <code>root</code> field value of our <code>MerkleTreeVerification</code> struct.</p>
+<p>Next we allocate a <code>UInt8</code> public input representing our leaf and the constant values for <code>leaf_crh_params</code> and <code>two_to_one_crh_params</code>. Again, we're not going to go into much detail about these two parameters, but they're provided by arkworks and are the <code>R1CS</code> equivalent of the parameters required by our merkle tree hash functions (see <a href="gadgets/../crypto_primitives.html#pedersen-commitment">crypto primitives</a> for more details).</p>
+<p>Finally, we have to allocate our private input representing the merkle path, of type:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct SimplePathVar = PathVar&lt;crate::MerkleConfig, LeafHashGadget, TwoToOneHashGadget, ConstraintF&gt;
+<span class="boring">}
+</span></code></pre></pre>
+<p>This is a gadget provided by arkworks, the <code>R1CS</code> equivalent of <code>Path&lt;P: Config&gt;</code>, it's a bit more complex than the other gadgets we've seen so far and it's at the crux of this entire circuit, so let's dive more into it.</p>
+<p>As the <code>R1CS</code> equivalent of <code>Path</code>, <code>PathVar</code> consists of the following fields</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct PathVar&lt;P, LeafH, TwoToOneH, ConstraintF&gt;
+{
+    /// `path[i]` is 0 (false) iff ith non-leaf node from top to bottom is left.
+    path: Vec&lt;Boolean&lt;ConstraintF&gt;&gt;,
+    /// `auth_path[i]` is the entry of sibling of ith non-leaf node from top to bottom.
+    auth_path: Vec&lt;TwoToOneH::OutputVar&gt;,
+    /// The sibling of leaf.
+    leaf_sibling: LeafH::OutputVar,
+    /// Is this leaf the right child?
+    leaf_is_right_child: Boolean&lt;ConstraintF&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>(I'm ommiting the generic type definitions to reduce visual clutter). This struct implements the <code>AllocVar</code> trait to be able to create public, private or constant variables by implementing the <code>new_variable</code> method:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn new_variable&lt;T: Borrow&lt;Path&lt;P&gt;&gt;&gt;(
+        cs: impl Into&lt;Namespace&lt;ConstraintF&gt;&gt;,
+        f: impl FnOnce() -&gt; Result&lt;T, SynthesisError&gt;,
+        mode: AllocationMode,
+    ) -&gt; Result&lt;Self, SynthesisError&gt; {
+        let ns = cs.into();
+        let cs = ns.cs();
+        f().and_then(|val| {
+            let leaf_sibling = LeafH::OutputVar::new_variable(
+                ark_relations::ns!(cs, &quot;leaf_sibling&quot;),
+                || Ok(val.borrow().leaf_sibling_hash.clone()),
+                mode,
+            )?;
+            let leaf_position_bit = Boolean::new_variable(
+                ark_relations::ns!(cs, &quot;leaf_position_bit&quot;),
+                || Ok(val.borrow().leaf_index &amp; 1 == 1),
+                mode,
+            )?;
+            let pos_list: Vec&lt;_&gt; = val.borrow().position_list().collect();
+            let path = Vec::new_variable(
+                ark_relations::ns!(cs, &quot;path_bits&quot;),
+                || Ok(&amp;pos_list[..(pos_list.len() - 1)]),
+                mode,
+            )?;
+
+            let auth_path = Vec::new_variable(
+                ark_relations::ns!(cs, &quot;auth_path_nodes&quot;),
+                || Ok(&amp;val.borrow().auth_path[..]),
+                mode,
+            )?;
+            Ok(PathVar {
+                path,
+                auth_path,
+                leaf_sibling,
+                leaf_is_right_child: leaf_position_bit,
+            })
+    })
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>When we called</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>SimplePathVar::new_witness(ark_relations::ns!(cs, &quot;path_var&quot;), || {
+    Ok(self.authentication_path.as_ref().unwrap())
+})?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>passing our <code>authentication_path</code> struct (i.e., our non-R1CS merkle path) in our circuit definition above, this internally called the <code>new_variable</code> method, which instantiates its internal fields by using the appropriate fields in our <code>authentication_path</code>.</p>
+<p>After creating a merkle path variable in our circuit, we call its <code>verify_membership</code> method to check that the path is correct</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let is_member = path.verify_membership(
+    &amp;leaf_crh_params,
+    &amp;two_to_one_crh_params,
+    &amp;root,
+    &amp;leaf_bytes.as_slice(),
+)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>this returns an <code>R1CS</code> <code>Boolean</code>, so we can then add a constraint to make sure it is true:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>is_member.enforce_equal(&amp;Boolean::TRUE)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Notice that the bulk of our <code>MerkleTree</code> circuit was just this gadget, which provides the <code>R1CS</code> API to use inside a circuit for checking merkle paths. Because it's a gadget, however, we can use it inside other circuits as part of more complex logic. For example, we could combine it with a gadget that verifies <code>Schnorr</code> signatures to create a circuit that takes a signed transaction updating some state in a merkle tree and checks both things: that the signature is valid and that the caller knew a leaf of the tree.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="crypto-primitives"><a class="header" href="#crypto-primitives">Crypto Primitives</a></h1>
+<h2 id="pedersen-hash-functioncommitment"><a class="header" href="#pedersen-hash-functioncommitment">Pedersen Hash Function/Commitment</a></h2>
+<p>The Pedersen hash functions are nothing more than fixing an elliptic curve point <code>G</code>, and then
+doing </p>
+<pre><code>hash(x) = xG
+</code></pre>
+<p>for a given <code>x</code>, which is an element of a finite field. The Pedersen <code>parameters</code> are just the sampling of the <code>G</code>. Different values of <code>G</code> give rise to a different Pedersen Hash.</p>
+<p>Note that there's a very important difference between popular hash functions like <code>Keccak</code>/<code>SHA3</code> and <code>Pedersen</code>: the input of <code>SHA3</code> is just an array of bytes of arbitrary length, and its output a fixed byte array. On the other hand, <code>Pedersen</code>'s input has to be a finite field element (and therefore cannot be of arbitrary length) and its output is an elliptic curve element. Indeed, this is the entire point of it; it's meant to be used in the context of ZK-SNARKS/circuits, where computation is done on elliptic curves over finite fields.</p>
+<p>The above poses a problem for <code>Pedersen</code> however. When using it as the underlying hash function for a Merkle Tree, one needs to take a pair of leaves or nodes and hash both to produce the next node in the tree. When using something like <code>SHA3</code>, what we do is hash the concatenation of the leaves/nodes, so we can use the same hash function we use to hash leaves to hash pairs of inner nodes. In the <code>Pedersen</code> case we can't do this, because the length of its inputs is fixed; concatenating inputs will not work.</p>
+<p>Because of this, <code>Pedersen</code> is usually divided into categories called <code>OneToOne</code>, <code>TwoToOne</code>, <code>FourToOne</code>, etc. <code>OneToOne</code> takes one input and produces one output, so it's used for hashing leaves; <code>TwoToOne</code> takes two inputs into one output and it's used for hashing pairs of leaves/nodes, and so on.</p>
+<p>With this in mind, let's take a look at the <code>MerkleTree</code> struct defined in <code>Arkworks</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct MerkleTree&lt;P: Config&gt; {
+    /// stores the non-leaf nodes in level order. The first element is the root node.
+    /// The ith nodes (starting at 1st) children are at indices `2*i`, `2*i+1`
+    non_leaf_nodes: Vec&lt;TwoToOneDigest&lt;P&gt;&gt;,
+    /// store the hash of leaf nodes from left to right
+    leaf_nodes: Vec&lt;LeafDigest&lt;P&gt;&gt;,
+    /// Store the two-to-one hash parameters
+    two_to_one_hash_param: TwoToOneParam&lt;P&gt;,
+    /// Store the leaf hash parameters
+    leaf_hash_param: LeafParam&lt;P&gt;,
+    /// Stores the height of the MerkleTree
+    height: usize,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Here, the <code>leaf_nodes</code> are of type <code>LeafDigest</code>, which are different from the <code>non_leaf_nodes</code>, which are <code>TwoToOneDigest</code>. These are generic types that represent the output of a <code>OneToOne</code> and <code>TwoToOne</code> ZK-Friendly hash function (like <code>Pedersen</code>, but it could be another one), respectively.</p>
+<p>Additionally, there are <code>leaf_hash_param</code> and <code>two_to_one_hash_param</code> fields, containing the parameters mentioned above for the <code>OneToOne</code> and <code>TwoToOne</code> hash functions, respectively.</p>
+<p>If you're wondering, the generic type <code>Config</code> just contains the types of the two hash functions used:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Config {
+    type LeafHash: CRH;
+    type TwoToOneHash: TwoToOneCRH;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>CRH</code> stands for <code>Collision Resistant Hash</code>.</p>
+<h3 id="pedersen-commitment"><a class="header" href="#pedersen-commitment">Pedersen Commitment</a></h3>
+<p>So far we have only talked about the <code>Pedersen</code> hash function, not the commitment. Even though one usually thinks of all hash functions as commitments themselves, cryptographers do not consider the above <code>Pedersen</code> hash function as one. The reason is that a commitment must satisfy two properties:</p>
+<ul>
+<li>
+<p>It must be <code>binding</code>. The commiter must not be able to open the commitment at a different value than they originally commited to. Let's go through a concrete example with hash functions to explain what this means. Let's say Alice and Bob go through a guessing game, where Alice chooses a number between 1 and 10 and Bob has to guess it.</p>
+<p>To make sure Alice isn't cheating, she first hashes the number and gives the hash to Bob. Thanks to this, when the game ends and Alice reveals the number <code>x</code> she chose, Bob can check whether Alice is lying or not by hashing it. This relies on one assumption, namely, that the hash function will not give the same result for two different values of <code>x</code> (this is known  as <code>collision resistance</code>).</p>
+</li>
+<li>
+<p>It must be <code>hiding</code>. A commitment to some data should not reveal anything about it.</p>
+</li>
+</ul>
+<p>The <code>Pedersen</code> hash above is <code>binding</code>, as it's collision resistant, but it is not <code>hiding</code>. This is because the hash of the data reveals something about it, the hash itself. This might seem like a minor thing but it's actually a big deal.</p>
+<p>Let's say we're working with a private blockchain, where a user's balance has to live on the blockchain for auditability, but needs to be private. One way to do it would be to store <em>hashes</em> of user balances. This way, users <em>commit</em> to their balance on-chain without revealing it. If we used the <code>Pedersen</code> hash to do this, however, we would run into a problem. People could precompute the hashes of common values and then check for them on-chain.</p>
+<p>For instance, we could compute the hash of <code>0</code>, obtaining <code>hash(0)</code>. Then we would immediately know which users have zero balance, by just scanning for balances with the <code>hash(0)</code> value.</p>
+<p>To fix this, the <code>Pedersen</code> commitment is introduced. It works in the same way as the hash, but in addition to doing <code>xG</code>, we sample another public random curve point <code>H</code> and then, to compute the commitment of <code>x</code>, we sample a <em>private</em> random number <code>r</code>. Then, the pedersen commitment is</p>
+<pre><code>commit(x) = xG + rH
+</code></pre>
+<p>This is now hiding, as the random value <code>r</code> is private. In the blockchain example above, the <code>0</code> balance does not always give the same pedersen commitment, as different people will sample a different value for <code>r</code>. People can no longer precompute the commitment of <code>0</code>, because there's no such thing as the one commitment of <code>0</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+                        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            MathJax.Hub.Register.StartupHook('End', function() {
+                window.setTimeout(window.print, 100);
+            });
+        });
+        </script>
+                
+    </body>
+</html>
