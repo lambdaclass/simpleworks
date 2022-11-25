@@ -16,4 +16,7 @@ cargo test --release --example schnorr-signature
 cargo test --release --example simple-payments
 ```
 
-You can check out the code for them under the `examples` directory, and a thorugh explanation of `test-circuit`, `manual-constraints` and `merkle-tree` [here](https://docs.cluster.entropy1729.com/arkworks/overview.html) (the Markdown source for it is [here](https://github.com/Entropy1729/docs/tree/main/mdbook/src/arkworks)).
+You can check out the code for them under the `examples` directory, and a thorugh explanation of:
+- `test-circuit`
+- `manual-constraints`
+- `merkle-tree` [here](https://docs.cluster.entropy1729.com/arkworks/overview.html) (the Markdown source for it is [here](https://github.com/Entropy1729/docs/tree/main/mdbook/src/arkworks))
