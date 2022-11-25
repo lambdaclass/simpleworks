@@ -69,5 +69,8 @@ pub fn verify_proof(
     let proof = MarlinProof::deserialize(&mut proof_serialized.as_slice())?;
     let rng = &mut ark_std::test_rng();
 
-    Ok(MarlinInst::verify(&verifying_key, &public_inputs, &proof, rng).unwrap())
+    let result = MarlinInst::verify(&verifying_key, &public_inputs, &proof, rng)
+        .map_err(|e| anyhow!("{:?}", e))?;
+
+    Ok(result)
 }
