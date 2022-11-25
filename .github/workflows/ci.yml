@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: 1.65.0
             profile: minimal
       - uses: Swatinem/rust-cache@v2
         with:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: 1.65.0
             components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
@@ -32,6 +32,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: 1.65.0
             components: rustfmt
       - run: cargo fmt -- --check
