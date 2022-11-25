@@ -1,11 +1,10 @@
 use ark_ff::Field;
 use ark_r1cs_std::{
     prelude::{AllocVar, AllocationMode, Boolean, EqGadget},
-    R1CSVar, uint8::UInt8,
+    uint8::UInt8,
+    R1CSVar,
 };
-use ark_relations::{
-    r1cs::{ConstraintSystemRef, Namespace, SynthesisError},
-};
+use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
 use std::borrow::Borrow;
 
 /// Represents an interpretation of 8 `Boolean` objects as an
@@ -34,7 +33,10 @@ impl<ConstraintF: Field> AllocVar<[u8; 63], ConstraintF> for Address<ConstraintF
             }
         }
 
-        Ok(Self { bytes: address_as_bytes, value })
+        Ok(Self {
+            bytes: address_as_bytes,
+            value,
+        })
     }
 }
 
@@ -48,7 +50,8 @@ impl<ConstraintF: Field> EqGadget<ConstraintF> for Address<ConstraintF> {
         other: &Self,
         condition: &Boolean<ConstraintF>,
     ) -> Result<(), SynthesisError> {
-        self.bytes.conditional_enforce_equal(&other.bytes, condition)
+        self.bytes
+            .conditional_enforce_equal(&other.bytes, condition)
     }
 
     fn conditional_enforce_not_equal(
@@ -77,6 +80,8 @@ impl<F: Field> R1CSVar<F> for Address<F> {
         debug_assert_eq!(self.value, Some(primitive_bytes));
 
         // TODO: Wrong error is returned.
-        Ok(std::str::from_utf8(&primitive_bytes).map_err(|_e| SynthesisError::AssignmentMissing)?.to_owned())
+        Ok(std::str::from_utf8(&primitive_bytes)
+            .map_err(|_e| SynthesisError::AssignmentMissing)?
+            .to_owned())
     }
 }
