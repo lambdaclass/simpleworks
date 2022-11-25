@@ -58,7 +58,9 @@ impl fmt::Display for SimpleworksValueType {
             SimpleworksValueType::U64(v) => write!(f, "{v}u64"),
             SimpleworksValueType::U128(v) => write!(f, "{v}u128"),
             SimpleworksValueType::Address(v) => write!(f, "{:?}", v),
-            SimpleworksValueType::Record(o, g) => write!(f, "Record {{ owner: {:?}, gates: {} }}", o, g)
+            SimpleworksValueType::Record(o, g) => {
+                write!(f, "Record {{ owner: {:?}, gates: {} }}", o, g)
+            }
         }
     }
 }
@@ -106,6 +108,9 @@ mod tests {
         let gates = 1_u64;
         let v = SimpleworksValueType::Record(address, gates);
         let out = format!("{v}");
-        assert_eq!(out, format!("Record {{ owner: {:?}, gates: {} }}", address, gates));
+        assert_eq!(
+            out,
+            format!("Record {{ owner: {:?}, gates: {} }}", address, gates)
+        );
     }
 }
