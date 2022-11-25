@@ -2,36 +2,35 @@ name: Simpleworks build checks
 on: push
 jobs:
   integration-tests:
-    runs-on: [self-hosted, nomad]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: 1.65.0
             profile: minimal
       - uses: Swatinem/rust-cache@v2
         with:
           key:  "simpleworks"
       - run: make test
   clippy:
-    runs-on: [self-hosted, nomad]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: 1.65.0
             components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           key:  "simpleworks"
-      - run: apt install -y clang libclang1
       - run: make clippy
   format:
-    runs-on: [self-hosted, nomad]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: 1.65.0
             components: rustfmt
       - run: cargo fmt -- --check
