@@ -24,7 +24,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key:  "simpleworks"
-      - run: apt install -y clang libclang1
       - run: make clippy
   format:
     runs-on: ubuntu-20.04
