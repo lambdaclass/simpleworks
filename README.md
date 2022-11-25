@@ -16,11 +16,11 @@ cargo test --release --example schnorr-signature
 cargo test --release --example simple-payments
 ```
 
-You can check out the code for them under the `examples` directory, and a thorugh explanation of `test-circuit`, `manual-constraints` and `merkle-tree` in the `docs` section. With [mdbook](https://rust-lang.github.io/mdBook/) installed, you can do 
+You can check out the code for them under the `examples` directory, and [a thorugh explanation of `test-circuit`, `manual-constraints` and `merkle-tree` on our site](https://entropy1729.github.io/simpleworks/overview.html) or by running it locally; with [mdbook](https://rust-lang.github.io/mdBook/) installed, you can do 
 
 ```
 cd docs
 mdbook serve --open
 ```
 
-to read them locally.
+to serve the docs on your machine.
