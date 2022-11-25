@@ -187,16 +187,18 @@ pub fn check_leave_exists_u8<L: ToBytes>(
         authentication_path: Some(path),
     };
 
-    // Next, let's make the circuit!
+    // make the circuit
     let cs = ConstraintSystem::new_ref();
-    circuit.generate_constraints(cs.clone()).unwrap();
-    // Let's check whether the constraint system is satisfied
-    let is_satisfied = cs.is_satisfied().unwrap();
-    if !is_satisfied {
-        // If it isn't, find out the offending constraint.
-        println!("{:?}", cs.which_is_unsatisfied());
-    }
-    assert!(is_satisfied);
+    circuit
+        .generate_constraints(cs.clone())
+        .map_err(|_e| anyhow!("Error generating constrinaints"))?;
+
+    // check whether the constraint system is satisfied
+    let is_satisfied = cs
+        .is_satisfied()
+        .map_err(|_e| anyhow!("Error checking if the constrinaints are satisfied"))?;
+
+    println!("Hello world!");
     Ok(is_satisfied)
 }
 
@@ -233,12 +235,14 @@ mod tests {
         // This follows the API in https://github.com/arkworks-rs/crypto-primitives/blob/6be606259eab0aec010015e2cfd45e4f134cd9bf/src/merkle_tree/mod.rs#L156
         // the i-th entry is the i-th leaf.
         let tree =
-            super::SimpleMerkleTree::new(&[1u8, 2u8, 3u8, 10u8, 9u8, 17u8, 70u8, 45u8]).unwrap();
+            super::SimpleMerkleTree::new(&[1_u8, 2_u8, 3_u8, 10_u8, 9_u8, 17_u8, 70_u8, 45_u8])
+                .unwrap();
 
         // We just mutate the first leaf
         // the i-th entry is the i-th leaf.
         let second_tree =
-            super::SimpleMerkleTree::new(&[4u8, 2u8, 3u8, 10u8, 9u8, 17u8, 70u8, 45u8]).unwrap();
+            super::SimpleMerkleTree::new(&[4_u8, 2_u8, 3_u8, 10_u8, 9_u8, 17_u8, 70_u8, 45_u8])
+                .unwrap();
 
         // Now, let's try to generate a membership proof for the 5th item, i.e. 9.
         let proof = tree.tree.generate_proof(4).unwrap(); // we're 0-indexing!
@@ -253,7 +257,7 @@ mod tests {
 
             // public inputs
             root: wrong_root,
-            leaf: 9u8,
+            leaf: 9_u8,
 
             // witness
             authentication_path: Some(proof),
@@ -274,14 +278,15 @@ mod tests {
         // This follows the API in https://github.com/arkworks-rs/crypto-primitives/blob/6be606259eab0aec010015e2cfd45e4f134cd9bf/src/merkle_tree/mod.rs#L156
         // the i-th entry is the i-th leaf.
         let tree =
-            super::SimpleMerkleTree::new(&[1u8, 2u8, 3u8, 10u8, 9u8, 17u8, 70u8, 45u8]).unwrap();
+            super::SimpleMerkleTree::new(&[1_u8, 2_u8, 3_u8, 10_u8, 9_u8, 17_u8, 70_u8, 45_u8])
+                .unwrap();
 
         let merkle_path = tree.tree.generate_proof(4).unwrap();
 
         // Now, try to generate the verifying key and proving key with Marlin
-        let proof = tree.prove(9u8, merkle_path).unwrap();
+        let proof = tree.prove(9_u8, merkle_path).unwrap();
 
-        let verify_ret = tree.verify(&proof, 9u8).unwrap();
+        let verify_ret = tree.verify(&proof, 9_u8).unwrap();
 
         assert!(verify_ret);
     }
