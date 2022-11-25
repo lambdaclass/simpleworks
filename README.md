@@ -19,4 +19,4 @@ cargo test --release --example simple-payments
 You can check out the code for them under the `examples` directory, and a thorugh explanation of:
 - `test-circuit`
 - `manual-constraints`
-- `merkle-tree` [here](https://github.com/Entropy1729/docs/tree/main/mdbook/src/arkworks)
+- [`merkle-tree`](https://github.com/Entropy1729/docs/tree/main/mdbook/src/arkworks)
