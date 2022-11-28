@@ -10,6 +10,7 @@ pub enum SimpleworksValueType {
     U64(u64),
     U128(u128),
     Address([u8; 63]),
+    Record([u8; 63], u64),
 }
 
 impl TryFrom<&String> for SimpleworksValueType {
@@ -57,6 +58,9 @@ impl fmt::Display for SimpleworksValueType {
             SimpleworksValueType::U64(v) => write!(f, "{v}u64"),
             SimpleworksValueType::U128(v) => write!(f, "{v}u128"),
             SimpleworksValueType::Address(v) => write!(f, "{:?}", v),
+            SimpleworksValueType::Record(o, g) => {
+                write!(f, "Record {{ owner: {:?}, gates: {} }}", o, g)
+            }
         }
     }
 }
@@ -93,5 +97,20 @@ mod tests {
         let v = SimpleworksValueType::Address(address);
         let out = format!("{v}");
         assert_eq!(out, format!("{:?}", address));
+        // Record
+        let mut address = [0_u8; 63];
+        let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
+        for (sender_address_byte, address_string_byte) in
+            address.iter_mut().zip(address_str.as_bytes())
+        {
+            *sender_address_byte = *address_string_byte;
+        }
+        let gates = 1_u64;
+        let v = SimpleworksValueType::Record(address, gates);
+        let out = format!("{v}");
+        assert_eq!(
+            out,
+            format!("Record {{ owner: {:?}, gates: {} }}", address, gates)
+        );
     }
 }
