@@ -1,10 +1,9 @@
 use super::traits::ToFieldElements;
-use super::UInt16Gadget;
 use anyhow::Result;
 use ark_ff::Field;
-use ark_r1cs_std::R1CSVar;
+use ark_r1cs_std::{uint16::UInt16, R1CSVar};
 
-impl<F: Field> ToFieldElements<F> for UInt16Gadget {
+impl<F: Field> ToFieldElements<F> for UInt16<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
         let bits_le = self.to_bits_le();
         let mut result = Vec::with_capacity(16);

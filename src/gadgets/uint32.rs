@@ -1,10 +1,9 @@
 use super::traits::ToFieldElements;
-use super::UInt32Gadget;
 use anyhow::Result;
 use ark_ff::Field;
-use ark_r1cs_std::R1CSVar;
+use ark_r1cs_std::{uint32::UInt32, R1CSVar};
 
-impl<F: Field> ToFieldElements<F> for UInt32Gadget {
+impl<F: Field> ToFieldElements<F> for UInt32<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
         let bits_le = self.to_bits_le();
         let mut result = Vec::with_capacity(32);
