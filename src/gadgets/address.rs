@@ -1,3 +1,4 @@
+use super::traits::ToFieldElements;
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{
@@ -7,8 +8,6 @@ use ark_r1cs_std::{
 };
 use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
 use std::borrow::Borrow;
-
-use super::traits::ToFieldElements;
 
 /// Represents an interpretation of 8 `Boolean` objects as an
 /// unsigned integer.
