@@ -1,4 +1,4 @@
-use super::ToFieldElements;
+use super::traits::ToFieldElements;
 use super::UInt64Gadget;
 use anyhow::Result;
 use ark_ff::Field;

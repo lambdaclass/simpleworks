@@ -6,8 +6,7 @@ use ark_r1cs_std::uint8::UInt8;
 
 mod address;
 pub use address::Address;
-mod traits;
-pub use traits::ToFieldElements;
+pub mod traits;
 mod uint128;
 mod uint16;
 mod uint32;
