@@ -25,9 +25,8 @@ pub type ProvingKey = IndexProverKey<
 >;
 pub type MarlinProof =
     Proof<Fr, MarlinKZG10<Bls12<Parameters>, DensePolynomial<Fp256<FrParameters>>>>;
-use ark_serialize::CanonicalDeserialize;
 
-use crate::types::value::SimpleworksValueType;
+use crate::gadgets::ConstraintF;
 
 pub fn generate_rand() -> StdRng {
     ark_std::test_rng()
@@ -61,16 +60,10 @@ pub fn generate_proof(
 }
 
 pub fn verify_proof(
-    verifying_key_serialized: Vec<u8>,
-    public_inputs: &[SimpleworksValueType],
-    proof_serialized: Vec<u8>,
+    verifying_key: VerifyingKey,
+    public_inputs: &[ConstraintF],
+    proof: MarlinProof,
 ) -> Result<bool> {
-    let verifying_key = VerifyingKey::deserialize(&mut verifying_key_serialized.as_slice())?;
-    let proof = MarlinProof::deserialize(&mut proof_serialized.as_slice())?;
     let rng = &mut ark_std::test_rng();
-
-    let result = MarlinInst::verify(&verifying_key, &public_inputs, &proof, rng)
-        .map_err(|e| anyhow!("{:?}", e))?;
-
-    Ok(result)
+    MarlinInst::verify(&verifying_key, public_inputs, &proof, rng).map_err(|e| anyhow!("{:?}", e))
 }

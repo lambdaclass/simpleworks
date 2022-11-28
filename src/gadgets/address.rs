@@ -1,11 +1,14 @@
+use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{
     prelude::{AllocVar, AllocationMode, Boolean, EqGadget},
     uint8::UInt8,
-    R1CSVar,
+    R1CSVar, ToBitsGadget,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
 use std::borrow::Borrow;
+
+use super::ToFieldElements;
 
 /// Represents an interpretation of 8 `Boolean` objects as an
 /// unsigned integer.
@@ -83,5 +86,21 @@ impl<F: Field> R1CSVar<F> for Address<F> {
         Ok(std::str::from_utf8(&primitive_bytes)
             .map_err(|_e| SynthesisError::AssignmentMissing)?
             .to_owned())
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for Address<F> {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let bits_le = self.bytes.to_bits_le()?;
+        let mut result = Vec::with_capacity(63 * 8);
+        for boolean_gadget_value in bits_le.iter() {
+            if boolean_gadget_value.value()? {
+                result.push(F::one())
+            } else {
+                result.push(F::zero())
+            }
+        }
+
+        Ok(result)
     }
 }
