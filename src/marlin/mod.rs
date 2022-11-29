@@ -38,17 +38,12 @@ pub fn generate_universal_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
 }
 
 pub fn generate_proof(
-    universal_srs: &UniversalSRS,
-    rng: &mut StdRng,
     constraint_system: ConstraintSystemRef,
+    proving_key: ProvingKey,
+    rng: &mut StdRng,
 ) -> Result<Vec<u8>> {
-    // Try to generate the verifying key and proving key with Marlin
-    let (index_proving_key, _index_verifying_key) =
-        MarlinInst::index_from_constraint_system(universal_srs, constraint_system.clone())
-            .map_err(|_e| anyhow!("Error in index_from_constraint_system"))?;
-
     let proof =
-        MarlinInst::prove_from_constraint_system(&index_proving_key, constraint_system, rng)
+        MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
             .map_err(|_e| anyhow!("Error in prove_from_constraint_system"))?;
 
     let mut bytes_proof = Vec::new();
@@ -63,7 +58,12 @@ pub fn verify_proof(
     verifying_key: VerifyingKey,
     public_inputs: &[ConstraintF],
     proof: MarlinProof,
+    rng: &mut StdRng,
 ) -> Result<bool> {
-    let rng = &mut ark_std::test_rng();
     MarlinInst::verify(&verifying_key, public_inputs, &proof, rng).map_err(|e| anyhow!("{:?}", e))
+}
+
+pub fn generate_proving_and_verifying_keys(universal_srs: &UniversalSRS, constraint_system: ConstraintSystemRef) -> Result<(ProvingKey, VerifyingKey)> {
+    MarlinInst::index_from_constraint_system(universal_srs, constraint_system)
+        .map_err(|_e| anyhow!("Error in index_from_constraint_system"))
 }
