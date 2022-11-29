@@ -27,7 +27,7 @@ ark-crypto-primitives = { version = "^0.3.0", default-features = true, features 
 
 # we use our fork of marlin crate, branch "use-constraint-system-directly"
 ark-marlin = { git = "https://github.com/Entropy1729/marlin.git", branch = "use-constraint-system-directly" }
-rand = { version = "0.8", default-features = false, features = ["std_rng"]}
+rand = { version = "0.8", default-features = false, features = ["std", "std_rng"]}
 
 # Important Note: the version of blake2 must be 0.9
 blake2 = { version = "0.9" }
@@ -41,6 +41,7 @@ bitvec = "1"
 derivative = { version = "2.0", features = ["use_core"] }
 digest = "0.9"
 hex = "0.4.3"
+chacha20poly1305 = { version = "0.10", features = ["stream"] }
 
 [[example]]
 name = "manual-constraints"
