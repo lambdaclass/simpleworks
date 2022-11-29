@@ -28,15 +28,38 @@ pub type MarlinProof =
 
 use crate::gadgets::ConstraintF;
 
+/// Return a pseudorandom number generator.
+/// 
 pub fn generate_rand() -> StdRng {
     ark_std::test_rng()
 }
 
+///  Generate the universal prover and verifier keys for the argument system.
+/// 
+/// # Parameters.
+/// - `rng` - A pseudorandom number generator (PRNG).
+/// 
+/// # Errors.
+/// Send the literal 'Error generating universal srs'.
+/// 
 pub fn generate_universal_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
     MarlinInst::universal_setup(100000, 25000, 300000, rng)
         .map_err(|_e| anyhow!("Error generating universal srs"))
 }
 
+///  Return the serialized version of the marlin proof for the given circuit/constraint system.
+///   
+/// # Parameters.
+/// - `universal_srs` - A universal prover and verifier keys for the argument system.
+/// - `rng` - A pseudorandom number generator (PRNG).
+/// - `constraint_system` - A shared reference to a constraint system that can be stored in high level variables.
+/// 
+/// # Errors
+/// Literal 'Error in index_from_constraint_system' when the Marlin generation of the keys fail.
+/// Literal 'Error in prove_from_constraint_system' when the Marlin proof of the proving key fail.
+/// Literal 'Error serializing proof' when the process of serialization of the proving key fail.
+/// Literal 'Error serializing verifying_key' when the process of serialization of the verifying key fail.
+/// 
 pub fn generate_proof(
     constraint_system: ConstraintSystemRef,
     proving_key: ProvingKey,
