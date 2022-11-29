@@ -42,9 +42,8 @@ pub fn generate_proof(
     proving_key: ProvingKey,
     rng: &mut StdRng,
 ) -> Result<Vec<u8>> {
-    let proof =
-        MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
-            .map_err(|_e| anyhow!("Error in prove_from_constraint_system"))?;
+    let proof = MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
+        .map_err(|_e| anyhow!("Error in prove_from_constraint_system"))?;
 
     let mut bytes_proof = Vec::new();
     proof
@@ -63,7 +62,10 @@ pub fn verify_proof(
     MarlinInst::verify(&verifying_key, public_inputs, &proof, rng).map_err(|e| anyhow!("{:?}", e))
 }
 
-pub fn generate_proving_and_verifying_keys(universal_srs: &UniversalSRS, constraint_system: ConstraintSystemRef) -> Result<(ProvingKey, VerifyingKey)> {
+pub fn generate_proving_and_verifying_keys(
+    universal_srs: &UniversalSRS,
+    constraint_system: ConstraintSystemRef,
+) -> Result<(ProvingKey, VerifyingKey)> {
     MarlinInst::index_from_constraint_system(universal_srs, constraint_system)
         .map_err(|_e| anyhow!("Error in index_from_constraint_system"))
 }
