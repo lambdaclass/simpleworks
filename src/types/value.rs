@@ -1,6 +1,10 @@
-use anyhow::{anyhow, bail};
+use anyhow::{anyhow, bail, Result};
+use ark_ff::Field;
 use std::convert::TryFrom;
 use std::fmt;
+
+use crate::gadgets::traits::ToFieldElements;
+use crate::gadgets::ConstraintF;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum SimpleworksValueType {
@@ -65,9 +69,118 @@ impl fmt::Display for SimpleworksValueType {
     }
 }
 
+impl ToFieldElements<ConstraintF> for SimpleworksValueType {
+    fn to_field_elements(&self) -> Result<Vec<ConstraintF>> {
+        match self {
+            SimpleworksValueType::U8(value) => value.to_field_elements(),
+            SimpleworksValueType::U16(value) => value.to_field_elements(),
+            SimpleworksValueType::U32(value) => value.to_field_elements(),
+            SimpleworksValueType::U64(value) => value.to_field_elements(),
+            SimpleworksValueType::U128(value) => value.to_field_elements(),
+            SimpleworksValueType::Address(value) => value.to_field_elements(),
+            SimpleworksValueType::Record(_owner, _gates) => {
+                bail!("Converting records to field elements is not supported")
+            }
+        }
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for u8 {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let field_elements = (0_u8..8_u8)
+            .into_iter()
+            .map(|bit_index| {
+                if self >> bit_index & 1 == 1 {
+                    F::one()
+                } else {
+                    F::zero()
+                }
+            })
+            .collect::<Vec<F>>();
+        Ok(field_elements)
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for u16 {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let field_elements = (0_u16..16_u16)
+            .into_iter()
+            .map(|bit_index| {
+                if self >> bit_index & 1 == 1 {
+                    F::one()
+                } else {
+                    F::zero()
+                }
+            })
+            .collect::<Vec<F>>();
+        Ok(field_elements)
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for u32 {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let field_elements = (0_u32..32_u32)
+            .into_iter()
+            .map(|bit_index| {
+                if self >> bit_index & 1 == 1 {
+                    F::one()
+                } else {
+                    F::zero()
+                }
+            })
+            .collect::<Vec<F>>();
+        Ok(field_elements)
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for u64 {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let field_elements = (0_u64..64_u64)
+            .into_iter()
+            .map(|bit_index| {
+                if self >> bit_index & 1 == 1 {
+                    F::one()
+                } else {
+                    F::zero()
+                }
+            })
+            .collect::<Vec<F>>();
+        Ok(field_elements)
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for u128 {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let field_elements = (0_u128..128_u128)
+            .into_iter()
+            .map(|bit_index| {
+                if self >> bit_index & 1 == 1 {
+                    F::one()
+                } else {
+                    F::zero()
+                }
+            })
+            .collect::<Vec<F>>();
+        Ok(field_elements)
+    }
+}
+
+impl<F: Field> ToFieldElements<F> for [u8; 63] {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let mut field_elements = Vec::with_capacity(63 * 8);
+        for byte in self.iter().rev() {
+            field_elements.extend_from_slice(&ToFieldElements::<F>::to_field_elements(byte)?);
+        }
+        Ok(field_elements)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::SimpleworksValueType;
+    use crate::gadgets::{traits::ToFieldElements, ConstraintF};
+    use ark_ff::Zero;
+    use ark_std::One;
 
     #[test]
     fn display_value() {
@@ -112,5 +225,228 @@ mod tests {
             out,
             format!("Record {{ owner: {:?}, gates: {} }}", address, gates)
         );
+    }
+
+    #[test]
+    fn test_u8_to_field_elements() {
+        let number = u8::MAX;
+        let expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::one(); 8];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u8_to_field_elements_is_little_endian() {
+        let number = 142_u8;
+        let expected_field_elements: Vec<ConstraintF> = vec![
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+        ];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u16_to_field_elements() {
+        let number = u16::MAX;
+        let expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::one(); 16];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u16_to_field_elements_is_little_endian() {
+        let number = 0b0000_0001_1010_0001_u16;
+        let expected_field_elements: Vec<ConstraintF> = vec![
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+        ];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u32_to_field_elements() {
+        let number = u32::MAX;
+        let expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::one(); 32];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u32_to_field_elements_is_little_endian() {
+        // Big endian
+        let number = 0b1000_0000_0000_0000_0000_0000_0000_0000_u32;
+        // Little endian
+        let mut expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::zero(); 31];
+        expected_field_elements.extend_from_slice(&[ConstraintF::one()]);
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u64_to_field_elements() {
+        let number = u64::MAX;
+        let expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::one(); 64];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u64_to_field_elements_is_little_endian() {
+        // Big endian
+        let number =
+            0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_u64;
+        // Little endian
+        let mut expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::zero(); 63];
+        expected_field_elements.extend_from_slice(&[ConstraintF::one()]);
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u128_to_field_elements() {
+        let number = u128::MAX;
+        let expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::one(); 128];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_u128_to_field_elements_is_little_endian() {
+        // Big endian
+        let number = 0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_u128;
+        // Little endian
+        let mut expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::zero(); 127];
+        expected_field_elements.extend_from_slice(&[ConstraintF::one()]);
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_address_to_field_elements() {
+        let mut address = [0_u8; 63];
+        let address_str = b"aleo11111111111111111111111111111111111111111111111111111111111";
+        for (sender_address_byte, address_string_byte) in address.iter_mut().zip(address_str) {
+            *sender_address_byte = *address_string_byte;
+        }
+
+        // 59 "1"s
+        let mut expected_field_elements = vec![
+            vec![
+                ConstraintF::one(),
+                ConstraintF::zero(),
+                ConstraintF::zero(),
+                ConstraintF::zero(),
+                ConstraintF::one(),
+                ConstraintF::one(),
+                ConstraintF::zero(),
+                ConstraintF::zero(),
+            ];
+            59
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<ConstraintF>>();
+        // "o"
+        expected_field_elements.extend_from_slice(&[
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+        ]);
+        // "e"
+        expected_field_elements.extend_from_slice(&[
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+        ]);
+        // "l"
+        expected_field_elements.extend_from_slice(&[
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+        ]);
+        // "a"
+        expected_field_elements.extend_from_slice(&[
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+        ]);
+
+        assert_eq!(expected_field_elements.len(), address.len() * 8);
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&address).unwrap()
+        )
     }
 }
