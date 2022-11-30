@@ -377,9 +377,7 @@ mod tests {
     fn test_address_to_field_elements() {
         let mut address = [0_u8; 63];
         let address_str = b"aleo11111111111111111111111111111111111111111111111111111111111";
-        for (sender_address_byte, address_string_byte) in
-            address.iter_mut().zip(address_str)
-        {
+        for (sender_address_byte, address_string_byte) in address.iter_mut().zip(address_str) {
             *sender_address_byte = *address_string_byte;
         }
 
@@ -396,7 +394,10 @@ mod tests {
                 ConstraintF::zero(),
             ];
             59
-        ].into_iter().flatten().collect::<Vec<ConstraintF>>();
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<ConstraintF>>();
         // "o"
         expected_field_elements.extend_from_slice(&[
             ConstraintF::one(),
