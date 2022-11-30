@@ -63,10 +63,10 @@ Let's say we're working with a private blockchain, where a user's balance has to
 
 For instance, we could compute the hash of `0`, obtaining `hash(0)`. Then we would immediately know which users have zero balance, by just scanning for balances with the `hash(0)` value.
 
-To fix this, the `Pedersen` commitment is introduced. It works in the same way as the hash, but in addition to doing `xG`, we sample another public random curve point `H` and then, to compute the commitment of `x`, we sample a *private* random number `r`. Then, the pedersen commitment is
+To fix this, the `Pedersen` commitment is introduced. It works in the same way as the hash, but in addition to doing `xG`, we sample another public random curve point `H` and then, to compute the commitment of `x`, we sample a random number `r`. Then, the pedersen commitment is
 
 ```
 commit(x) = xG + rH
 ```
 
-This is now hiding, as the random value `r` is private. In the blockchain example above, the `0` balance does not always give the same pedersen commitment, as different people will sample a different value for `r`. People can no longer precompute the commitment of `0`, because there's no such thing as the one commitment of `0`.
+This is now hiding, as the random value `r` makes the result different each time we commit. In the blockchain example above, the `0` balance does not always give the same pedersen commitment, as different people will sample a different value for `r`. People can no longer precompute the commitment of `0`, because there's no such thing as the one commitment of `0`. The important bit here is that, in order for this to work, people should always use a different value for `r`, which is sometimes referred to as a `nonce`.
