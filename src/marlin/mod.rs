@@ -5,7 +5,6 @@ use ark_ff::Fp256;
 use ark_marlin::{IndexProverKey, IndexVerifierKey, Marlin, Proof, SimpleHashFiatShamirRng};
 use ark_poly::univariate::DensePolynomial;
 use ark_poly_commit::marlin_pc::MarlinKZG10;
-use ark_serialize::CanonicalSerialize;
 use blake2::Blake2s;
 use rand::rngs::StdRng;
 use rand_chacha::ChaChaRng;
@@ -64,16 +63,9 @@ pub fn generate_proof(
     constraint_system: ConstraintSystemRef,
     proving_key: ProvingKey,
     rng: &mut StdRng,
-) -> Result<Vec<u8>> {
-    let proof = MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
-        .map_err(|_e| anyhow!("Error in prove_from_constraint_system"))?;
-
-    let mut bytes_proof = Vec::new();
-    proof
-        .serialize(&mut bytes_proof)
-        .map_err(|_e| anyhow!("Error serializing proof"))?;
-
-    Ok(bytes_proof)
+) -> Result<MarlinProof> {
+    MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
+        .map_err(|_e| anyhow!("Error in prove_from_constraint_system"))
 }
 
 pub fn verify_proof(
