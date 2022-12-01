@@ -96,5 +96,6 @@ pub fn serialize_proof(proof: MarlinProof) -> Result<Vec<u8>> {
 }
 
 pub fn deserialize_proof(bytes_proof: Vec<u8>) -> Result<MarlinProof> {
-    MarlinProof::deserialize(&mut bytes_proof.as_slice()).map_err(|_e| anyhow!("Error deserializing proof"))
+    MarlinProof::deserialize(&mut bytes_proof.as_slice())
+        .map_err(|_e| anyhow!("Error deserializing proof"))
 }
