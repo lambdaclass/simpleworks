@@ -1,12 +1,9 @@
 use anyhow::{anyhow, bail, Result};
 use ark_ff::Field;
 use indexmap::IndexMap;
-use serde::de::{MapAccess, Visitor};
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{de, ser::SerializeMap, Deserialize, Deserializer, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
-use std::marker::PhantomData;
 
 use crate::gadgets::traits::ToFieldElements;
 use crate::gadgets::ConstraintF;
@@ -40,7 +37,7 @@ impl<'de> Deserialize<'de> for Address {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SimpleworksValueType {
     U8(u8),
     U16(u16),
@@ -353,7 +350,10 @@ mod tests {
         let out = format!("{v}");
         assert_eq!(
             out,
-            format!("Record {{ owner: {:?}, gates: {}, entries: {{}} }}", address, gates)
+            format!(
+                "Record {{ owner: {:?}, gates: {}, entries: {{}} }}",
+                address, gates
+            )
         );
     }
 
@@ -579,7 +579,7 @@ mod tests {
             ToFieldElements::<ConstraintF>::to_field_elements(&address).unwrap()
         )
     }
-    
+
     /* Deserialize Tests */
 
     #[test]
