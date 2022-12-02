@@ -151,9 +151,10 @@ impl TryFrom<&String> for SimpleworksValueType {
             let value_int = v.parse::<u128>().map_err(|e| anyhow!("{}", e))?;
             return Ok(SimpleworksValueType::U128(value_int));
         } else if value.starts_with("aleo1") {
-            let v = value.trim_start_matches("aleo1");
             let mut address = [0_u8; 63];
-            for (sender_address_byte, address_string_byte) in address.iter_mut().zip(v.as_bytes()) {
+            for (sender_address_byte, address_string_byte) in
+                address.iter_mut().zip(value.as_bytes())
+            {
                 *sender_address_byte = *address_string_byte;
             }
             return Ok(SimpleworksValueType::Address(Address(address)));
