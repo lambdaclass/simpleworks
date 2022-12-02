@@ -8,6 +8,7 @@ use crate::gadgets::traits::ToFieldElements;
 use crate::gadgets::ConstraintF;
 
 pub type Address = [u8; 63];
+pub type RecordEntriesMap = IndexMap<String, SimpleworksValueType>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SimpleworksValueType {
@@ -20,7 +21,7 @@ pub enum SimpleworksValueType {
     Record {
         owner: Address,
         gates: u64,
-        entries: RecordEntries,
+        entries: RecordEntriesMap,
     },
 }
 
@@ -63,7 +64,13 @@ impl Serialize for SimpleworksValueType {
                 owner,
                 gates,
                 entries,
-            } => todo!(),
+            } => {
+                let mut s = serializer.serialize_map(Some(3))?;
+                s.serialize_entry("owner", &bytes_to_string(owner).map_err(|_e| serde::ser::Error::custom("bytes to string"))?)?;
+                s.serialize_entry("gates", gates)?;
+                s.serialize_entry("entries", &hashmap_to_string(entries).map_err(|_e| serde::ser::Error::custom("hashmap to string"))?)?;
+                s.end()
+            },
         }
     }
 }
@@ -78,21 +85,28 @@ impl<'de> Deserialize<'de> for SimpleworksValueType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RecordEntries(pub RecordEntriesMap);
-pub type RecordEntriesMap = IndexMap<String, SimpleworksValueType>;
-
-impl Serialize for RecordEntries {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut map = serializer.serialize_map(Some(self.0.len()))?;
-        for (k, v) in &self.0 {
-            map.serialize_entry(&k, &v)?;
-        }
-        map.end()
+fn bytes_to_string(bytes: &[u8]) -> Result<String> {
+    let mut o = String::with_capacity(63);
+    for byte in bytes {
+        let c = char::from_u32(<u8 as std::convert::Into<u32>>::into(*byte)).ok_or("Error converting u8 into u32").map_err(|e| anyhow!("{e}"))?;
+        o.push(c);
     }
+    Ok(o)
+}
+
+fn hashmap_to_string(hashmap: &RecordEntriesMap) -> Result<String> {
+    let mut ret = String::new();
+    ret.push('{');
+
+    for (i, (k, v)) in hashmap.iter().enumerate() {
+        ret.push_str(&format!("\"{}\":\"{}\"", k, v));
+        if i > 0 {
+            ret.push(',');
+        }
+    }
+
+    ret.push('}');
+    Ok(ret)
 }
 
 impl TryFrom<&String> for SimpleworksValueType {
@@ -149,7 +163,7 @@ impl fmt::Display for SimpleworksValueType {
                 write!(
                     f,
                     "Record {{ owner: {:?}, gates: {}, entries: {:?} }}",
-                    owner, gates, entries.0
+                    owner, gates, entries
                 )
             }
         }
@@ -270,12 +284,10 @@ impl<F: Field> ToFieldElements<F> for [u8; 63] {
 mod tests {
     use super::SimpleworksValueType;
     use crate::{
-        gadgets::{traits::ToFieldElements, ConstraintF},
-        types::value::RecordEntries,
+        gadgets::{traits::ToFieldElements, ConstraintF}, types::value::RecordEntriesMap,
     };
     use ark_ff::Zero;
     use ark_std::One;
-    use indexmap::IndexMap;
 
     #[test]
     fn display_value() {
@@ -317,7 +329,7 @@ mod tests {
         let v = SimpleworksValueType::Record {
             owner: address,
             gates,
-            entries: RecordEntries(IndexMap::new()),
+            entries: RecordEntriesMap::default(),
         };
         let out = format!("{v}");
         assert_eq!(
@@ -692,5 +704,21 @@ mod tests {
         let v = serde_json::to_string(&data).unwrap();
 
         assert_eq!(v, format!("\"{data}\""));
+    }
+
+    #[test]
+    fn test_serialize_record() {
+        let mut address = [0_u8; 63];
+        let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
+        for (sender_address_byte, address_string_byte) in
+            address.iter_mut().zip(address_str.as_bytes())
+        {
+            *sender_address_byte = *address_string_byte;
+        }
+        let data = SimpleworksValueType::Record { owner: address, gates: 0, entries: RecordEntriesMap::default()};
+
+        let v = serde_json::to_string(&data).unwrap();
+
+        assert_eq!(v, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":0,\"entries\":\"{}\"}");
     }
 }
