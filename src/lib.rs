@@ -32,6 +32,7 @@
     clippy::let_underscore_must_use
 )]
 
+pub mod encryption;
 pub mod gadgets;
 pub mod marlin;
 pub mod merkle_tree;
