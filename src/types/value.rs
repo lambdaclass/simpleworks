@@ -8,34 +8,7 @@ use std::fmt;
 use crate::gadgets::traits::ToFieldElements;
 use crate::gadgets::ConstraintF;
 
-// This is a wrapper that lets us implement Serialize & Deserialize for an Address.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Address(pub [u8; 63]);
-
-impl Serialize for Address {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_bytes(&self.0)
-    }
-}
-
-impl<'de> Deserialize<'de> for Address {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let request = serde_json::Value::deserialize(deserializer)?;
-
-        let mut address = [0_u8; 63];
-        for (address_byte, request_byte) in address.iter_mut().zip(request.to_string().as_bytes()) {
-            *address_byte = *request_byte;
-        }
-
-        Ok(Self(address))
-    }
-}
+pub type Address = [u8; 63];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SimpleworksValueType {
@@ -83,7 +56,7 @@ impl Serialize for SimpleworksValueType {
                 v_string.push_str("u128");
                 v_string.serialize(serializer)
             }
-            SimpleworksValueType::Address(Address(v)) => {
+            SimpleworksValueType::Address(v) => {
                 let v_string = format!("{v:?}");
                 v_string.serialize(serializer)
             }
@@ -154,7 +127,7 @@ impl TryFrom<&String> for SimpleworksValueType {
             {
                 *sender_address_byte = *address_string_byte;
             }
-            return Ok(SimpleworksValueType::Address(Address(address)));
+            return Ok(SimpleworksValueType::Address(address));
         }
         bail!("Unknown type")
     }
@@ -168,7 +141,7 @@ impl fmt::Display for SimpleworksValueType {
             SimpleworksValueType::U32(v) => write!(f, "{v}u32"),
             SimpleworksValueType::U64(v) => write!(f, "{v}u64"),
             SimpleworksValueType::U128(v) => write!(f, "{v}u128"),
-            SimpleworksValueType::Address(Address(v)) => write!(f, "{:?}", v),
+            SimpleworksValueType::Address(v) => write!(f, "{:?}", v),
             SimpleworksValueType::Record {
                 owner,
                 gates,
@@ -177,7 +150,7 @@ impl fmt::Display for SimpleworksValueType {
                 write!(
                     f,
                     "Record {{ owner: {:?}, gates: {}, entries: {:?} }}",
-                    owner.0, gates, entries.0
+                    owner, gates, entries.0
                 )
             }
         }
@@ -192,7 +165,7 @@ impl ToFieldElements<ConstraintF> for SimpleworksValueType {
             SimpleworksValueType::U32(value) => value.to_field_elements(),
             SimpleworksValueType::U64(value) => value.to_field_elements(),
             SimpleworksValueType::U128(value) => value.to_field_elements(),
-            SimpleworksValueType::Address(Address(value)) => value.to_field_elements(),
+            SimpleworksValueType::Address(value) => value.to_field_elements(),
             SimpleworksValueType::Record {
                 owner: _,
                 gates: _,
@@ -330,7 +303,7 @@ mod tests {
         {
             *sender_address_byte = *address_string_byte;
         }
-        let v = SimpleworksValueType::Address(Address(address));
+        let v = SimpleworksValueType::Address(address);
         let out = format!("{v}");
         assert_eq!(out, format!("{:?}", address));
         // Record
@@ -343,7 +316,7 @@ mod tests {
         }
         let gates = 1_u64;
         let v = SimpleworksValueType::Record {
-            owner: Address(address),
+            owner: address,
             gates,
             entries: RecordEntries(IndexMap::new()),
         };
@@ -590,7 +563,7 @@ mod tests {
         let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
 
         assert!(matches!(v, SimpleworksValueType::Address(_)));
-        if let SimpleworksValueType::Address(Address(a)) = v {
+        if let SimpleworksValueType::Address(a) = v {
             assert_eq!(a, address.as_bytes());
         }
     }
@@ -603,7 +576,7 @@ mod tests {
         let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U8(_)));
-        if let SimpleworksValueType::Address(Address(a)) = v {
+        if let SimpleworksValueType::Address(a) = v {
             assert_eq!(a, address.as_bytes());
         }
     }
@@ -616,7 +589,7 @@ mod tests {
         let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U16(_)));
-        if let SimpleworksValueType::Address(Address(a)) = v {
+        if let SimpleworksValueType::Address(a) = v {
             assert_eq!(a, address.as_bytes());
         }
     }
@@ -629,7 +602,7 @@ mod tests {
         let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U32(_)));
-        if let SimpleworksValueType::Address(Address(a)) = v {
+        if let SimpleworksValueType::Address(a) = v {
             assert_eq!(a, address.as_bytes());
         }
     }
@@ -642,7 +615,7 @@ mod tests {
         let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U64(_)));
-        if let SimpleworksValueType::Address(Address(a)) = v {
+        if let SimpleworksValueType::Address(a) = v {
             assert_eq!(a, address.as_bytes());
         }
     }
@@ -655,7 +628,7 @@ mod tests {
         let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U128(_)));
-        if let SimpleworksValueType::Address(Address(a)) = v {
+        if let SimpleworksValueType::Address(a) = v {
             assert_eq!(a, address.as_bytes());
         }
     }
@@ -670,7 +643,7 @@ mod tests {
         {
             *sender_address_byte = *address_string_byte;
         }
-        let data = SimpleworksValueType::Address(Address(address));
+        let data = SimpleworksValueType::Address(address);
 
         let v = serde_json::to_string(&data).unwrap();
 
