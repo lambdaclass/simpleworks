@@ -149,7 +149,7 @@ mod tests {
             ret_str
         );
 
-        let address2 = AddressGadget::new_witness(Namespace::new(cs.clone(), None), || {
+        let address2 = AddressGadget::new_witness(Namespace::new(cs, None), || {
             Ok(b"aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d")
         })
         .unwrap();
