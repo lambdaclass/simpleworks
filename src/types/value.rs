@@ -58,16 +58,54 @@ pub enum SimpleworksValueType {
 impl Serialize for SimpleworksValueType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
+        S: serde::Serializer,
+    {
         match self {
-            SimpleworksValueType::U8(v) => v.serialize(serializer),
-            SimpleworksValueType::U16(v) => v.serialize(serializer),
-            SimpleworksValueType::U32(v) => v.serialize(serializer),
-            SimpleworksValueType::U64(v) => v.serialize(serializer),
-            SimpleworksValueType::U128(v) => v.serialize(serializer),
-            SimpleworksValueType::Address(v) => v.serialize(serializer),
-            SimpleworksValueType::Record { owner, gates, entries } => todo!(),
+            SimpleworksValueType::U8(v) => {
+                let mut v_string = v.to_string();
+                v_string.push_str("u8");
+                v_string.serialize(serializer)
+            }
+            SimpleworksValueType::U16(v) => {
+                let mut v_string = v.to_string();
+                v_string.push_str("u16");
+                v_string.serialize(serializer)
+            }
+            SimpleworksValueType::U32(v) => {
+                let mut v_string = v.to_string();
+                v_string.push_str("u32");
+                v_string.serialize(serializer)
+            }
+            SimpleworksValueType::U64(v) => {
+                let mut v_string = v.to_string();
+                v_string.push_str("u64");
+                v_string.serialize(serializer)
+            }
+            SimpleworksValueType::U128(v) => {
+                let mut v_string = v.to_string();
+                v_string.push_str("u128");
+                v_string.serialize(serializer)
+            }
+            SimpleworksValueType::Address(Address(v)) => {
+                let v_string = format!("{v:?}");
+                v_string.serialize(serializer)
+            }
+            SimpleworksValueType::Record {
+                owner,
+                gates,
+                entries,
+            } => todo!(),
         }
+    }
+}
+
+impl<'de> Deserialize<'de> for SimpleworksValueType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        Self::try_from(&value).map_err(de::Error::custom)
     }
 }
 
