@@ -1,20 +1,147 @@
 use anyhow::{anyhow, bail, Result};
 use ark_ff::Field;
+use indexmap::IndexMap;
+use serde::de::{Visitor, MapAccess};
+use serde::ser::SerializeMap;
+use serde::{Serialize, Deserialize, Deserializer};
 use std::convert::TryFrom;
 use std::fmt;
+use std::marker::PhantomData;
 
 use crate::gadgets::traits::ToFieldElements;
 use crate::gadgets::ConstraintF;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+// This is a wrapper that lets us implement Serialize & Deserialize for an Address.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Address(pub [u8; 63]);
+
+impl Serialize for Address {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        serializer.serialize_bytes(&self.0)
+    }
+}
+
+impl<'de> Deserialize<'de> for Address {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+        let mut request = serde_json::Value::deserialize(deserializer)?;
+
+        let mut address = [0_u8; 63];
+        for (address_byte, request_byte) in address.iter_mut().zip(request.to_string().as_bytes())
+        {
+            *address_byte = *request_byte;
+        }
+
+        Ok(Self(address))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SimpleworksValueType {
     U8(u8),
     U16(u16),
     U32(u32),
     U64(u64),
     U128(u128),
-    Address([u8; 63]),
-    Record([u8; 63], u64),
+    Address(Address),
+    Record { owner: Address, gates: u64, entries: RecordEntries },
+}
+
+// impl<'de> Deserialize<'de> for SimpleworksValueType {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: Deserializer<'de> {
+        
+//     }
+// } 
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct  RecordEntries(pub RecordEntriesMap);
+pub type RecordEntriesMap = IndexMap<String, SimpleworksValueType>;
+
+impl Serialize for RecordEntries {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        let mut map = serializer.serialize_map(Some(self.0.len()))?;
+        for (k, v) in &self.0 {
+            map.serialize_entry(&k, &v)?;
+        }
+        map.end()
+    }
+}
+
+// A Visitor is a type that holds methods that a Deserializer can drive
+// depending on what is contained in the input data.
+//
+// In the case of a map we need generic type parameters K and V to be
+// able to set the output type correctly, but don't require any state.
+// This is an example of a "zero sized type" in Rust. The PhantomData
+// keeps the compiler from complaining about unused generic type
+// parameters.
+struct RecordEntriesVisitor {
+    marker: PhantomData<fn() -> RecordEntriesMap>
+}
+
+impl RecordEntriesVisitor {
+    fn new() -> Self {
+        Self {
+            marker: PhantomData
+        }
+    }
+}
+
+// This is the trait that Deserializers are going to be driving. There
+// is one method for each type of data that our type knows how to
+// deserialize from. There are many other methods that are not
+// implemented here, for example deserializing from integers or strings.
+// By default those methods will return an error, which makes sense
+// because we cannot deserialize a MyMap from an integer or string.
+impl<'de> Visitor<'de> for RecordEntriesVisitor
+where
+{
+    // The type that our Visitor is going to produce.
+    type Value = RecordEntriesMap;
+
+    // Format a message stating what data this Visitor expects to receive.
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a very special map")
+    }
+
+    // Deserialize MyMap from an abstract "map" provided by the
+    // Deserializer. The MapAccess input is a callback provided by
+    // the Deserializer to let us see each entry in the map.
+    fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error>
+    where
+        M: MapAccess<'de>,
+    {
+        let mut map = IndexMap::with_capacity(access.size_hint().unwrap_or(0));
+
+        // While there are entries remaining in the input, add them
+        // into our map.
+        while let Some((key, value)) = access.next_entry()? {
+            map.insert(key, value);
+        }
+
+        Ok(map)
+    }
+}
+
+// This is the trait that informs Serde how to deserialize MyMap.
+impl<'de> Deserialize<'de> for RecordEntries
+where
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // Instantiate our Visitor and ask the Deserializer to drive
+        // it over the input data, resulting in an instance of MyMap.
+        Ok(Self(deserializer.deserialize_map(RecordEntriesVisitor::new())?))
+    }
 }
 
 impl TryFrom<&String> for SimpleworksValueType {
@@ -47,7 +174,7 @@ impl TryFrom<&String> for SimpleworksValueType {
             for (sender_address_byte, address_string_byte) in address.iter_mut().zip(v.as_bytes()) {
                 *sender_address_byte = *address_string_byte;
             }
-            return Ok(SimpleworksValueType::Address(address));
+            return Ok(SimpleworksValueType::Address(Address(address)));
         }
         bail!("Unknown type")
     }
@@ -62,8 +189,8 @@ impl fmt::Display for SimpleworksValueType {
             SimpleworksValueType::U64(v) => write!(f, "{v}u64"),
             SimpleworksValueType::U128(v) => write!(f, "{v}u128"),
             SimpleworksValueType::Address(v) => write!(f, "{:?}", v),
-            SimpleworksValueType::Record(o, g) => {
-                write!(f, "Record {{ owner: {:?}, gates: {} }}", o, g)
+            SimpleworksValueType::Record { owner, gates, entries } => {
+                write!(f, "Record {{ owner: {:?}, gates: {}, entries: {:?} }}", owner, gates, entries)
             }
         }
     }
@@ -77,8 +204,8 @@ impl ToFieldElements<ConstraintF> for SimpleworksValueType {
             SimpleworksValueType::U32(value) => value.to_field_elements(),
             SimpleworksValueType::U64(value) => value.to_field_elements(),
             SimpleworksValueType::U128(value) => value.to_field_elements(),
-            SimpleworksValueType::Address(value) => value.to_field_elements(),
-            SimpleworksValueType::Record(_owner, _gates) => {
+            SimpleworksValueType::Address(Address(value)) => value.to_field_elements(),
+            SimpleworksValueType::Record { owner: _, gates: _, entries: _ } => {
                 bail!("Converting records to field elements is not supported")
             }
         }
@@ -178,9 +305,10 @@ impl<F: Field> ToFieldElements<F> for [u8; 63] {
 #[cfg(test)]
 mod tests {
     use super::SimpleworksValueType;
-    use crate::gadgets::{traits::ToFieldElements, ConstraintF};
+    use crate::{gadgets::{traits::ToFieldElements, ConstraintF}, types::value::{Address, RecordEntries}};
     use ark_ff::Zero;
     use ark_std::One;
+    use indexmap::IndexMap;
 
     #[test]
     fn display_value() {
@@ -207,7 +335,7 @@ mod tests {
         {
             *sender_address_byte = *address_string_byte;
         }
-        let v = SimpleworksValueType::Address(address);
+        let v = SimpleworksValueType::Address(Address(address));
         let out = format!("{v}");
         assert_eq!(out, format!("{:?}", address));
         // Record
@@ -219,7 +347,7 @@ mod tests {
             *sender_address_byte = *address_string_byte;
         }
         let gates = 1_u64;
-        let v = SimpleworksValueType::Record(address, gates);
+        let v = SimpleworksValueType::Record { owner: Address(address), gates, entries: RecordEntries(IndexMap::new()) };
         let out = format!("{v}");
         assert_eq!(
             out,
