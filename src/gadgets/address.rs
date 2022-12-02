@@ -7,6 +7,7 @@ use ark_r1cs_std::{
     R1CSVar, ToBitsGadget,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
+use serde::ser::{Serialize, Serializer};
 use std::borrow::Borrow;
 use std::string::ToString;
 
@@ -118,6 +119,16 @@ impl<ConstraintF: Field> ToString for Address<ConstraintF> {
     }
 }
 
+impl<ConstraintF: Field> Serialize for Address<ConstraintF> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let v = self.to_string();
+        serializer.serialize_str(&v)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::AddressGadget;
@@ -147,6 +158,12 @@ mod tests {
         assert_eq!(
             "aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d",
             ret_str2
+        );
+
+        let serialized = serde_json::to_string(&address2).unwrap();
+        assert_eq!(
+            "\"aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d\"",
+            serialized
         );
     }
 }
