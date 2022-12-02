@@ -2,8 +2,7 @@ use anyhow::{anyhow, bail, Result};
 use ark_ff::Field;
 use indexmap::IndexMap;
 use serde::{de, ser::SerializeMap, Deserialize, Deserializer, Serialize};
-use std::convert::TryFrom;
-use std::fmt;
+use std::{convert::TryFrom, fmt};
 
 use crate::gadgets::traits::ToFieldElements;
 use crate::gadgets::ConstraintF;
@@ -272,7 +271,7 @@ mod tests {
     use super::SimpleworksValueType;
     use crate::{
         gadgets::{traits::ToFieldElements, ConstraintF},
-        types::value::{Address, RecordEntries},
+        types::value::RecordEntries,
     };
     use ark_ff::Zero;
     use ark_std::One;
