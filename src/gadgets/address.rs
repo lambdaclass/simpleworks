@@ -8,6 +8,7 @@ use ark_r1cs_std::{
 };
 use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
 use std::borrow::Borrow;
+use std::string::ToString;
 
 /// Represents an interpretation of 8 `Boolean` objects as an
 /// unsigned integer.
@@ -101,5 +102,40 @@ impl<F: Field> ToFieldElements<F> for Address<F> {
         }
 
         Ok(result)
+    }
+}
+
+impl<ConstraintF: Field> ToString for Address<ConstraintF> {
+    fn to_string(&self) -> String {
+        let mut ret = String::with_capacity(63);
+        if let Some(value) = self.value {
+            for byte in value {
+                let c = char::from_u32(byte.into()).unwrap_or(' ');
+                ret.push(c);
+            }
+        }
+        ret
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::AddressGadget;
+    use ark_r1cs_std::alloc::AllocVar;
+    use ark_relations::r1cs::{ConstraintSystem, Namespace};
+
+    #[test]
+    fn test_address_to_string() {
+        let cs = ConstraintSystem::<ark_ed_on_bls12_381::Fq>::new_ref();
+        let address = AddressGadget::new_witness(Namespace::new(cs.clone(), None), || {
+            Ok(b"aleo11111111111111111111111111111111111111111111111111111111111")
+        })
+        .unwrap();
+
+        let ret_str = address.to_string();
+        assert_eq!(
+            "aleo11111111111111111111111111111111111111111111111111111111111",
+            ret_str
+        );
     }
 }
