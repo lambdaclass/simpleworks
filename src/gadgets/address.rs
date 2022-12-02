@@ -137,5 +137,16 @@ mod tests {
             "aleo11111111111111111111111111111111111111111111111111111111111",
             ret_str
         );
+
+        let address2 = AddressGadget::new_witness(Namespace::new(cs.clone(), None), || {
+            Ok(b"aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d")
+        })
+        .unwrap();
+
+        let ret_str2 = address2.to_string();
+        assert_eq!(
+            "aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d",
+            ret_str2
+        );
     }
 }
