@@ -166,7 +166,7 @@ the variable
 which is just a complicated way of saying `a - b` inside our finite field. Putting it all together, our constraint is
 
 $$
-0 + 0 = a - b
+0 * 0 = a - b
 $$
 
 a.k.a.
