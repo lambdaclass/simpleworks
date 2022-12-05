@@ -72,10 +72,10 @@ pub fn generate_proof(
 pub fn verify_proof(
     verifying_key: VerifyingKey,
     public_inputs: &[ConstraintF],
-    proof: MarlinProof,
+    proof: &MarlinProof,
     rng: &mut StdRng,
 ) -> Result<bool> {
-    MarlinInst::verify(&verifying_key, public_inputs, &proof, rng).map_err(|e| anyhow!("{:?}", e))
+    MarlinInst::verify(&verifying_key, public_inputs, proof, rng).map_err(|e| anyhow!("{:?}", e))
 }
 
 pub fn generate_proving_and_verifying_keys(
