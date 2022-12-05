@@ -33,19 +33,26 @@ impl Serialize for SimpleworksValueType {
         S: serde::Serializer,
     {
         match self {
-            SimpleworksValueType::Record { owner, gates, entries } => {
+            SimpleworksValueType::Record {
+                owner,
+                gates,
+                entries,
+            } => {
                 let mut fields = 3;
                 if !entries.is_empty() {
                     fields = 2;
                 }
                 let mut state = serializer.serialize_struct("Record", fields)?;
-                state.serialize_field("owner", &bytes_to_string(owner).map_err(serde::ser::Error::custom)?)?;
+                state.serialize_field(
+                    "owner",
+                    &bytes_to_string(owner).map_err(serde::ser::Error::custom)?,
+                )?;
                 state.serialize_field("gates", &format!("{gates}u64"))?;
                 if !entries.is_empty() {
                     state.serialize_field("entries", &entries)?;
                 }
                 state.end()
-            },
+            }
             _ => {
                 let value = format!("{}", self);
                 value.serialize(serializer)
@@ -621,9 +628,7 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize_record_without_entries() {
-        
-    }
+    fn test_deserialize_record_without_entries() {}
 
     /* Serialize Tests */
     #[test]
