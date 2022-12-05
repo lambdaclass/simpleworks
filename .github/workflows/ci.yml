@@ -1,18 +1,6 @@
 name: Simpleworks build checks
 on: push
 jobs:
-  integration-tests:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-            toolchain: 1.65.0
-            profile: minimal
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key:  "simpleworks"
-      - run: make test
   clippy:
     runs-on: ubuntu-20.04
     steps:
