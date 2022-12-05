@@ -627,9 +627,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_deserialize_record_without_entries() {}
-
     /* Serialize Tests */
     #[test]
     fn test_serialize_address() {
