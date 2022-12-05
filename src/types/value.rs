@@ -564,66 +564,51 @@ mod tests {
 
     #[test]
     fn test_deserialize_u8() {
-        let address = "0u8";
-        let data = format!("\"{address}\"");
-
-        let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
+        let v: SimpleworksValueType = serde_json::from_str("\"0u8\"").unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U8(_)));
-        if let SimpleworksValueType::Address(a) = v {
-            assert_eq!(a, address.as_bytes());
+        if let SimpleworksValueType::U8(value) = v {
+            assert_eq!(value, 0_u8);
         }
     }
 
     #[test]
     fn test_deserialize_u16() {
-        let address = "0u16";
-        let data = format!("\"{address}\"");
-
-        let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
+        let v: SimpleworksValueType = serde_json::from_str("\"0u16\"").unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U16(_)));
-        if let SimpleworksValueType::Address(a) = v {
-            assert_eq!(a, address.as_bytes());
+        if let SimpleworksValueType::U16(value) = v {
+            assert_eq!(value, 0_u16);
         }
     }
 
     #[test]
     fn test_deserialize_u32() {
-        let address = "0u32";
-        let data = format!("\"{address}\"");
-
-        let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
+        let v: SimpleworksValueType = serde_json::from_str("\"0u32\"").unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U32(_)));
-        if let SimpleworksValueType::Address(a) = v {
-            assert_eq!(a, address.as_bytes());
+        if let SimpleworksValueType::U32(value) = v {
+            assert_eq!(value, 0_u32);
         }
     }
 
     #[test]
     fn test_deserialize_u64() {
-        let address = "0u64";
-        let data = format!("\"{address}\"");
-
-        let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
+        let v: SimpleworksValueType = serde_json::from_str("\"0u64\"").unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U64(_)));
-        if let SimpleworksValueType::Address(a) = v {
-            assert_eq!(a, address.as_bytes());
+        if let SimpleworksValueType::U64(value) = v {
+            assert_eq!(value, 0_u64);
         }
     }
 
     #[test]
     fn test_deserialize_u128() {
-        let address = "0u128";
-        let data = format!("\"{address}\"");
-
-        let v: SimpleworksValueType = serde_json::from_str(&data).unwrap();
+        let v: SimpleworksValueType = serde_json::from_str("\"0u128\"").unwrap();
 
         assert!(matches!(v, SimpleworksValueType::U128(_)));
-        if let SimpleworksValueType::Address(a) = v {
-            assert_eq!(a, address.as_bytes());
+        if let SimpleworksValueType::U128(value) = v {
+            assert_eq!(value, 0_u128);
         }
     }
 
