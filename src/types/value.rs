@@ -1,7 +1,8 @@
 use anyhow::{anyhow, bail, Result};
 use ark_ff::Field;
 use indexmap::IndexMap;
-use serde::{de, ser::SerializeMap, Deserialize, Deserializer, Serialize};
+use serde::ser::{Error, SerializeStruct};
+use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt};
 
 use crate::gadgets::traits::ToFieldElements;
@@ -10,7 +11,8 @@ use crate::gadgets::ConstraintF;
 pub type Address = [u8; 63];
 pub type RecordEntriesMap = IndexMap<String, SimpleworksValueType>;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(try_from = "String")]
 pub enum SimpleworksValueType {
     U8(u8),
     U16(u16),
@@ -31,64 +33,33 @@ impl Serialize for SimpleworksValueType {
         S: serde::Serializer,
     {
         match self {
-            SimpleworksValueType::U8(v) => {
-                let mut v_string = v.to_string();
-                v_string.push_str("u8");
-                v_string.serialize(serializer)
-            }
-            SimpleworksValueType::U16(v) => {
-                let mut v_string = v.to_string();
-                v_string.push_str("u16");
-                v_string.serialize(serializer)
-            }
-            SimpleworksValueType::U32(v) => {
-                let mut v_string = v.to_string();
-                v_string.push_str("u32");
-                v_string.serialize(serializer)
-            }
-            SimpleworksValueType::U64(v) => {
-                let mut v_string = v.to_string();
-                v_string.push_str("u64");
-                v_string.serialize(serializer)
-            }
-            SimpleworksValueType::U128(v) => {
-                let mut v_string = v.to_string();
-                v_string.push_str("u128");
-                v_string.serialize(serializer)
-            }
-            SimpleworksValueType::Address(v) => {
-                let v_string = format!("{v:?}");
-                v_string.serialize(serializer)
-            }
-            SimpleworksValueType::Record {
-                owner,
-                gates,
-                entries,
-            } => {
-                let mut s = serializer.serialize_map(Some(3))?;
-                s.serialize_entry("owner", &bytes_to_string(owner).map_err(|_e| serde::ser::Error::custom("bytes to string"))?)?;
-                s.serialize_entry("gates", gates)?;
-                s.serialize_entry("entries", &hashmap_to_string(entries).map_err(|_e| serde::ser::Error::custom("hashmap to string"))?)?;
-                s.end()
+            SimpleworksValueType::Record { owner, gates, entries } => {
+                let mut fields = 3;
+                if !entries.is_empty() {
+                    fields = 2;
+                }
+                let mut state = serializer.serialize_struct("Record", fields)?;
+                state.serialize_field("owner", &bytes_to_string(owner).map_err(serde::ser::Error::custom)?)?;
+                state.serialize_field("gates", &format!("{gates}u64"))?;
+                if !entries.is_empty() {
+                    state.serialize_field("entries", &entries)?;
+                }
+                state.end()
             },
+            _ => {
+                let value = format!("{}", self);
+                value.serialize(serializer)
+            }
         }
-    }
-}
-
-impl<'de> Deserialize<'de> for SimpleworksValueType {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let value = String::deserialize(deserializer)?;
-        Self::try_from(&value).map_err(de::Error::custom)
     }
 }
 
 fn bytes_to_string(bytes: &[u8]) -> Result<String> {
     let mut o = String::with_capacity(63);
     for byte in bytes {
-        let c = char::from_u32(<u8 as std::convert::Into<u32>>::into(*byte)).ok_or("Error converting u8 into u32").map_err(|e| anyhow!("{e}"))?;
+        let c = char::from_u32(<u8 as std::convert::Into<u32>>::into(*byte))
+            .ok_or("Error converting u8 into u32")
+            .map_err(|e| anyhow!("{e}"))?;
         o.push(c);
     }
     Ok(o)
@@ -109,10 +80,16 @@ fn hashmap_to_string(hashmap: &RecordEntriesMap) -> Result<String> {
     Ok(ret)
 }
 
-impl TryFrom<&String> for SimpleworksValueType {
+impl From<SimpleworksValueType> for String {
+    fn from(value: SimpleworksValueType) -> Self {
+        format!("{}", value)
+    }
+}
+
+impl TryFrom<String> for SimpleworksValueType {
     type Error = anyhow::Error;
 
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
+    fn try_from(value: String) -> Result<Self, Self::Error> {
         if value.ends_with("u8") {
             let v = value.trim_end_matches("u8");
             let value_int = v.parse::<u8>().map_err(|e| anyhow!("{}", e))?;
@@ -154,17 +131,30 @@ impl fmt::Display for SimpleworksValueType {
             SimpleworksValueType::U32(v) => write!(f, "{v}u32"),
             SimpleworksValueType::U64(v) => write!(f, "{v}u64"),
             SimpleworksValueType::U128(v) => write!(f, "{v}u128"),
-            SimpleworksValueType::Address(v) => write!(f, "{:?}", v),
+            SimpleworksValueType::Address(v) => {
+                write!(f, "{:?}", bytes_to_string(v).map_err(fmt::Error::custom)?)
+            }
             SimpleworksValueType::Record {
                 owner,
                 gates,
                 entries,
             } => {
-                write!(
-                    f,
-                    "Record {{ owner: {:?}, gates: {}, entries: {:?} }}",
-                    owner, gates, entries
-                )
+                if entries.is_empty() {
+                    write!(
+                        f,
+                        "{{\"owner\":\"{}\",\"gates\":\"{}u64\"}}",
+                        bytes_to_string(owner).map_err(fmt::Error::custom)?,
+                        gates
+                    )
+                } else {
+                    write!(
+                        f,
+                        "{{\"owner\":\"{}\",\"gates\":\"{}u64\",\"entries\":{:?}}}",
+                        bytes_to_string(owner).map_err(fmt::Error::custom)?,
+                        gates,
+                        entries
+                    )
+                }
             }
         }
     }
@@ -284,7 +274,8 @@ impl<F: Field> ToFieldElements<F> for [u8; 63] {
 mod tests {
     use super::SimpleworksValueType;
     use crate::{
-        gadgets::{traits::ToFieldElements, ConstraintF}, types::value::RecordEntriesMap,
+        gadgets::{traits::ToFieldElements, ConstraintF},
+        types::value::RecordEntriesMap,
     };
     use ark_ff::Zero;
     use ark_std::One;
@@ -316,8 +307,8 @@ mod tests {
         }
         let v = SimpleworksValueType::Address(address);
         let out = format!("{v}");
-        assert_eq!(out, format!("{:?}", address));
-        // Record
+        assert_eq!(out, format!("\"{address_str}\""));
+        // Record without entries
         let mut address = [0_u8; 63];
         let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
         for (sender_address_byte, address_string_byte) in
@@ -332,13 +323,24 @@ mod tests {
             entries: RecordEntriesMap::default(),
         };
         let out = format!("{v}");
-        assert_eq!(
-            out,
-            format!(
-                "Record {{ owner: {:?}, gates: {}, entries: {{}} }}",
-                address, gates
-            )
-        );
+        assert_eq!(out, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"1u64\"}");
+        // Record with entries
+        let mut address = [0_u8; 63];
+        let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
+        for (sender_address_byte, address_string_byte) in
+            address.iter_mut().zip(address_str.as_bytes())
+        {
+            *sender_address_byte = *address_string_byte;
+        }
+        let mut entries = RecordEntriesMap::new();
+        entries.insert("amount".to_owned(), SimpleworksValueType::U64(0));
+        let v = SimpleworksValueType::Record {
+            owner: address,
+            gates: 0,
+            entries,
+        };
+        let out = format!("{v}");
+        assert_eq!(out, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\",\"entries\":{\"amount\":\"0u64\"}}");
     }
 
     #[test]
@@ -644,6 +646,11 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_deserialize_record_without_entries() {
+        
+    }
+
     /* Serialize Tests */
     #[test]
     fn test_serialize_address() {
@@ -658,7 +665,7 @@ mod tests {
 
         let v = serde_json::to_string(&data).unwrap();
 
-        assert_eq!(v, format!("\"{:?}\"", address_str.as_bytes()));
+        assert_eq!(v, format!("\"\\\"{address_str}\\\"\""));
     }
 
     #[test]
@@ -707,7 +714,7 @@ mod tests {
     }
 
     #[test]
-    fn test_serialize_record() {
+    fn test_serialize_record_without_entries() {
         let mut address = [0_u8; 63];
         let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
         for (sender_address_byte, address_string_byte) in
@@ -715,10 +722,36 @@ mod tests {
         {
             *sender_address_byte = *address_string_byte;
         }
-        let data = SimpleworksValueType::Record { owner: address, gates: 0, entries: RecordEntriesMap::default()};
+        let data = SimpleworksValueType::Record {
+            owner: address,
+            gates: 0,
+            entries: RecordEntriesMap::default(),
+        };
 
         let v = serde_json::to_string(&data).unwrap();
 
-        assert_eq!(v, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":0,\"entries\":\"{}\"}");
+        assert_eq!(v, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\"}");
+    }
+
+    #[test]
+    fn test_serialize_record_with_entries() {
+        let mut address = [0_u8; 63];
+        let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
+        for (sender_address_byte, address_string_byte) in
+            address.iter_mut().zip(address_str.as_bytes())
+        {
+            *sender_address_byte = *address_string_byte;
+        }
+        let mut entries = RecordEntriesMap::new();
+        entries.insert("amount".to_owned(), SimpleworksValueType::U64(0));
+        let data = SimpleworksValueType::Record {
+            owner: address,
+            gates: 0,
+            entries,
+        };
+
+        let v = serde_json::to_string(&data).unwrap();
+
+        assert_eq!(v, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\",\"entries\":{\"amount\":\"0u64\"}}");
     }
 }
