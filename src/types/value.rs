@@ -139,22 +139,13 @@ impl fmt::Display for SimpleworksValueType {
                 gates,
                 entries,
             } => {
-                if entries.is_empty() {
-                    write!(
-                        f,
-                        "{{\"owner\":\"{}\",\"gates\":\"{}u64\"}}",
-                        bytes_to_string(owner).map_err(fmt::Error::custom)?,
-                        gates
-                    )
-                } else {
-                    write!(
-                        f,
-                        "{{\"owner\":\"{}\",\"gates\":\"{}u64\",\"entries\":{:?}}}",
-                        bytes_to_string(owner).map_err(fmt::Error::custom)?,
-                        gates,
-                        entries
-                    )
-                }
+                write!(
+                    f,
+                    "{{\"owner\":\"{}\",\"gates\":\"{}u64\",\"entries\":{}}}",
+                    bytes_to_string(owner).map_err(fmt::Error::custom)?,
+                    gates,
+                    hashmap_to_string(entries).map_err(fmt::Error::custom)?,
+                )
             }
         }
     }
@@ -308,7 +299,7 @@ mod tests {
         let v = SimpleworksValueType::Address(address);
         let out = format!("{v}");
         assert_eq!(out, format!("\"{address_str}\""));
-        // Record without entries
+        // Record
         let mut address = [0_u8; 63];
         let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
         for (sender_address_byte, address_string_byte) in
@@ -323,24 +314,7 @@ mod tests {
             entries: RecordEntriesMap::default(),
         };
         let out = format!("{v}");
-        assert_eq!(out, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"1u64\"}");
-        // Record with entries
-        let mut address = [0_u8; 63];
-        let address_str = "aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m";
-        for (sender_address_byte, address_string_byte) in
-            address.iter_mut().zip(address_str.as_bytes())
-        {
-            *sender_address_byte = *address_string_byte;
-        }
-        let mut entries = RecordEntriesMap::new();
-        entries.insert("amount".to_owned(), SimpleworksValueType::U64(0));
-        let v = SimpleworksValueType::Record {
-            owner: address,
-            gates: 0,
-            entries,
-        };
-        let out = format!("{v}");
-        assert_eq!(out, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\",\"entries\":{\"amount\":\"0u64\"}}");
+        assert_eq!(out, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"1u64\",\"entries\":{}}");
     }
 
     #[test]
