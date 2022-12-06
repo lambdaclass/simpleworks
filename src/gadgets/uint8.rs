@@ -1,4 +1,4 @@
-use super::traits::{ToFieldElements, IsWitness};
+use super::traits::{IsWitness, ToFieldElements};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{uint8::UInt8, R1CSVar, ToBitsGadget};
