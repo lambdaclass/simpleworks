@@ -1,10 +1,10 @@
-use super::traits::ToFieldElements;
+use super::traits::{IsWitness, ToFieldElements};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{
     prelude::{AllocVar, AllocationMode, Boolean, EqGadget},
     uint8::UInt8,
-    R1CSVar, ToBitsGadget,
+    R1CSVar, ToBitsGadget, ToBytesGadget,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
 use serde::ser::{Serialize, Serializer};
@@ -128,6 +128,14 @@ impl<ConstraintF: Field> Serialize for Address<ConstraintF> {
         serializer.serialize_str(&v)
     }
 }
+
+impl<F: Field> ToBytesGadget<F> for Address<F> {
+    fn to_bytes(&self) -> Result<Vec<UInt8<F>>, SynthesisError> {
+        Ok(self.bytes.clone())
+    }
+}
+
+impl<F: Field> IsWitness<F> for Address<F> {}
 
 #[cfg(test)]
 mod tests {
