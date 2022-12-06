@@ -5,6 +5,12 @@ use ark_r1cs_std::{
 mod address;
 pub use address::Address;
 
+mod uint128;
+mod uint16;
+mod uint32;
+mod uint64;
+mod uint8;
+
 pub mod traits;
 
 pub type ConstraintF = ark_ed_on_bls12_381::Fq;

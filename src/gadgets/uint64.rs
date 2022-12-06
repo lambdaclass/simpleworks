@@ -1,4 +1,4 @@
-use super::traits::ToFieldElements;
+use super::traits::{ToFieldElements, IsWitness};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{uint64::UInt64, R1CSVar};
@@ -18,3 +18,5 @@ impl<F: Field> ToFieldElements<F> for UInt64<F> {
         Ok(result)
     }
 }
+
+impl<F: Field> IsWitness<F> for UInt64<F> {}
