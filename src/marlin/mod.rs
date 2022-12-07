@@ -5,7 +5,6 @@ use ark_ff::Fp256;
 use ark_marlin::{IndexProverKey, IndexVerifierKey, Marlin, Proof, SimpleHashFiatShamirRng};
 use ark_poly::univariate::DensePolynomial;
 use ark_poly_commit::marlin_pc::MarlinKZG10;
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use blake2::Blake2s;
 use rand::rngs::StdRng;
 use rand_chacha::ChaChaRng;
@@ -27,6 +26,7 @@ pub type MarlinProof =
     Proof<Fr, MarlinKZG10<Bls12<Parameters>, DensePolynomial<Fp256<FrParameters>>>>;
 
 use crate::gadgets::ConstraintF;
+pub mod serialization;
 
 /// Return a pseudorandom number generator.
 ///
@@ -84,46 +84,4 @@ pub fn generate_proving_and_verifying_keys(
 ) -> Result<(ProvingKey, VerifyingKey)> {
     MarlinInst::index_from_constraint_system(universal_srs, constraint_system)
         .map_err(|_e| anyhow!("Error in index_from_constraint_system"))
-}
-
-pub fn serialize_proof(proof: MarlinProof) -> Result<Vec<u8>> {
-    let mut bytes_proof = Vec::new();
-    proof
-        .serialize(&mut bytes_proof)
-        .map_err(|_e| anyhow!("Error serializing proof"))?;
-
-    Ok(bytes_proof)
-}
-
-pub fn deserialize_proof(bytes_proof: Vec<u8>) -> Result<MarlinProof> {
-    MarlinProof::deserialize(&mut bytes_proof.as_slice())
-        .map_err(|_e| anyhow!("Error deserializing proof"))
-}
-
-pub fn serialize_verifying_key(verifying_key: VerifyingKey) -> Result<Vec<u8>> {
-    let mut bytes_verifying_key = Vec::new();
-    verifying_key
-        .serialize(&mut bytes_verifying_key)
-        .map_err(|_e| anyhow!("Error serializing proof"))?;
-
-    Ok(bytes_verifying_key)
-}
-
-pub fn deserialize_verifying_key(bytes_verifying_key: Vec<u8>) -> Result<VerifyingKey> {
-    VerifyingKey::deserialize(&mut bytes_verifying_key.as_slice())
-        .map_err(|_e| anyhow!("Error deserializing proof"))
-}
-
-pub fn serialize_proving_key(proving_key: VerifyingKey) -> Result<Vec<u8>> {
-    let mut bytes_proving_key = Vec::new();
-    proving_key
-        .serialize(&mut bytes_proving_key)
-        .map_err(|_e| anyhow!("Error serializing proof"))?;
-
-    Ok(bytes_proving_key)
-}
-
-pub fn deserialize_proving_key(bytes_proving_key: Vec<u8>) -> Result<ProvingKey> {
-    ProvingKey::deserialize(&mut bytes_proving_key.as_slice())
-        .map_err(|_e| anyhow!("Error deserializing proof"))
 }
