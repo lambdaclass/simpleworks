@@ -43,8 +43,7 @@ pub fn generate_rand() -> StdRng {
 /// Send the literal 'Error generating universal srs'.
 ///
 pub fn generate_universal_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
-    MarlinInst::universal_setup(100000, 25000, 300000, rng)
-        .map_err(|_e| anyhow!("Error generating universal srs"))
+    MarlinInst::universal_setup(100000, 25000, 300000, rng).map_err(|e| anyhow!("{:?}", e))
 }
 
 ///  Return the serialized version of the marlin proof for the given circuit/constraint system.
@@ -66,7 +65,7 @@ pub fn generate_proof(
     rng: &mut StdRng,
 ) -> Result<MarlinProof> {
     MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
-        .map_err(|_e| anyhow!("Error in prove_from_constraint_system"))
+        .map_err(|e| anyhow!("{:?}", e))
 }
 
 pub fn verify_proof(
@@ -83,5 +82,5 @@ pub fn generate_proving_and_verifying_keys(
     constraint_system: ConstraintSystemRef,
 ) -> Result<(ProvingKey, VerifyingKey)> {
     MarlinInst::index_from_constraint_system(universal_srs, constraint_system)
-        .map_err(|_e| anyhow!("Error in index_from_constraint_system"))
+        .map_err(|e| anyhow!("{:?}", e))
 }
