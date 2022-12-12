@@ -42,8 +42,10 @@ pub fn generate_rand() -> StdRng {
 /// # Errors.
 /// Send the literal 'Error generating universal srs'.
 ///
-pub fn generate_universal_srs(rng: &mut StdRng) -> Result<UniversalSRS> {
-    MarlinInst::universal_setup(100000, 25000, 300000, rng).map_err(|e| anyhow!("{:?}", e))
+pub fn generate_universal_srs(rng: &mut StdRng) -> Result<Box<UniversalSRS>> {
+    Ok(Box::new(
+        MarlinInst::universal_setup(100000, 25000, 300000, rng).map_err(|e| anyhow!("{:?}", e))?,
+    ))
 }
 
 ///  Return the serialized version of the marlin proof for the given circuit/constraint system.
