@@ -11,7 +11,7 @@ struct LeafWindow;
 
 impl pedersen::Window for LeafWindow {
     const WINDOW_SIZE: usize = 4;
-    const NUM_WINDOWS: usize = 144;
+    const NUM_WINDOWS: usize = 380;
 }
 
 type PedersenHash = PedersenCRHCompressor<EdwardsProjective, TECompressor, LeafWindow>;
