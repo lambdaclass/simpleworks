@@ -32,6 +32,7 @@
     clippy::let_underscore_must_use
 )]
 
+pub mod fields;
 pub mod gadgets;
 pub mod hash;
 pub mod marlin;
