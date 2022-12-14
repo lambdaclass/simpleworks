@@ -30,7 +30,7 @@ pub fn deserialize_verifying_key(bytes_verifying_key: Vec<u8>) -> Result<Verifyi
         .map_err(|_e| anyhow!("Error deserializing proof"))
 }
 
-pub fn serialize_proving_key(proving_key: VerifyingKey) -> Result<Vec<u8>> {
+pub fn serialize_proving_key(proving_key: ProvingKey) -> Result<Vec<u8>> {
     let mut bytes_proving_key = Vec::new();
     proving_key
         .serialize(&mut bytes_proving_key)
