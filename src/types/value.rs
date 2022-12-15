@@ -5,6 +5,7 @@ use serde::ser::{Error, SerializeStruct};
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt};
 
+use crate::fields::serialize_field_element;
 use crate::gadgets::traits::ToFieldElements;
 use crate::gadgets::ConstraintF;
 
@@ -24,6 +25,7 @@ pub enum SimpleworksValueType {
         owner: Address,
         gates: u64,
         entries: RecordEntriesMap,
+        nonce: ConstraintF,
     },
 }
 
@@ -37,20 +39,16 @@ impl Serialize for SimpleworksValueType {
                 owner,
                 gates,
                 entries,
+                nonce,
             } => {
-                let mut fields = 3;
-                if !entries.is_empty() {
-                    fields = 2;
-                }
-                let mut state = serializer.serialize_struct("Record", fields)?;
+                let mut state = serializer.serialize_struct("Record", 4)?;
                 state.serialize_field(
                     "owner",
                     &bytes_to_string(owner).map_err(serde::ser::Error::custom)?,
                 )?;
                 state.serialize_field("gates", &format!("{gates}u64"))?;
-                if !entries.is_empty() {
-                    state.serialize_field("entries", &entries)?;
-                }
+                state.serialize_field("entries", &entries)?;
+                state.serialize_field("nonce", &hex::encode(serialize_field_element(*nonce).map_err(serde::ser::Error::custom)?))?;
                 state.end()
             }
             _ => {
@@ -145,13 +143,15 @@ impl fmt::Display for SimpleworksValueType {
                 owner,
                 gates,
                 entries,
+                nonce,
             } => {
                 write!(
                     f,
-                    "{{\"owner\":\"{}\",\"gates\":\"{}u64\",\"entries\":{}}}",
+                    "{{\"owner\":\"{}\",\"gates\":\"{}u64\",\"entries\":{},\"nonce\":\"{}\"}}",
                     bytes_to_string(owner).map_err(fmt::Error::custom)?,
                     gates,
                     hashmap_to_string(entries).map_err(fmt::Error::custom)?,
+                    hex::encode(serialize_field_element(*nonce).map_err(fmt::Error::custom)?)
                 )
             }
         }
@@ -171,6 +171,7 @@ impl ToFieldElements<ConstraintF> for SimpleworksValueType {
                 owner: _,
                 gates: _,
                 entries: _,
+                nonce: _,
             } => {
                 bail!("Converting records to field elements is not supported")
             }
@@ -273,9 +274,9 @@ mod tests {
     use super::SimpleworksValueType;
     use crate::{
         gadgets::{traits::ToFieldElements, ConstraintF},
-        types::value::RecordEntriesMap,
+        types::value::RecordEntriesMap, marlin::generate_rand, fields::serialize_field_element,
     };
-    use ark_ff::Zero;
+    use ark_ff::{Zero, UniformRand};
     use ark_std::One;
 
     #[test]
@@ -315,13 +316,15 @@ mod tests {
             *sender_address_byte = *address_string_byte;
         }
         let gates = 1_u64;
+        let nonce = ConstraintF::rand(&mut generate_rand());
         let v = SimpleworksValueType::Record {
             owner: address,
             gates,
             entries: RecordEntriesMap::default(),
+            nonce,
         };
         let out = format!("{v}");
-        assert_eq!(out, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"1u64\",\"entries\":{}}");
+        assert_eq!(out, format!("{{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"1u64\",\"entries\":{{}},\"nonce\":\"{}\"}}", hex::encode(serialize_field_element(nonce).unwrap())));
     }
 
     #[test]
@@ -683,15 +686,17 @@ mod tests {
         {
             *sender_address_byte = *address_string_byte;
         }
+        let nonce = ConstraintF::rand(&mut generate_rand());
         let data = SimpleworksValueType::Record {
             owner: address,
             gates: 0,
             entries: RecordEntriesMap::default(),
+            nonce,
         };
 
         let v = serde_json::to_string(&data).unwrap();
 
-        assert_eq!(v, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\"}");
+        assert_eq!(v, format!("{{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\",\"entries\":{{}},\"nonce\":\"{}\"}}", hex::encode(serialize_field_element(nonce).unwrap())));
     }
 
     #[test]
@@ -705,14 +710,16 @@ mod tests {
         }
         let mut entries = RecordEntriesMap::new();
         entries.insert("amount".to_owned(), SimpleworksValueType::U64(0));
+        let nonce = ConstraintF::rand(&mut generate_rand());
         let data = SimpleworksValueType::Record {
             owner: address,
             gates: 0,
             entries,
+            nonce,
         };
 
         let v = serde_json::to_string(&data).unwrap();
 
-        assert_eq!(v, "{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\",\"entries\":{\"amount\":\"0u64\"}}");
+        assert_eq!(v, format!("{{\"owner\":\"aleo1ecw94zggphqkpdsjhfjutr9p33nn9tk2d34tz23t29awtejupugq4vne6m\",\"gates\":\"0u64\",\"entries\":{{\"amount\":\"0u64\"}},\"nonce\":\"{}\"}}", hex::encode(serialize_field_element(nonce).unwrap())));
     }
 }
