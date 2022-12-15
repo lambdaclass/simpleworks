@@ -48,7 +48,12 @@ impl Serialize for SimpleworksValueType {
                 )?;
                 state.serialize_field("gates", &format!("{gates}u64"))?;
                 state.serialize_field("entries", &entries)?;
-                state.serialize_field("nonce", &hex::encode(serialize_field_element(*nonce).map_err(serde::ser::Error::custom)?))?;
+                state.serialize_field(
+                    "nonce",
+                    &hex::encode(
+                        serialize_field_element(*nonce).map_err(serde::ser::Error::custom)?,
+                    ),
+                )?;
                 state.end()
             }
             _ => {
@@ -273,10 +278,12 @@ impl<F: Field> ToFieldElements<F> for [u8; 63] {
 mod tests {
     use super::SimpleworksValueType;
     use crate::{
+        fields::serialize_field_element,
         gadgets::{traits::ToFieldElements, ConstraintF},
-        types::value::RecordEntriesMap, marlin::generate_rand, fields::serialize_field_element,
+        marlin::generate_rand,
+        types::value::RecordEntriesMap,
     };
-    use ark_ff::{Zero, UniformRand};
+    use ark_ff::{UniformRand, Zero};
     use ark_std::One;
 
     #[test]
