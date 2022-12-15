@@ -131,7 +131,7 @@ impl<F: Field> ToFieldElements<F> for [u8; 63] {
 mod test {
     use super::ToFieldElements;
     use crate::gadgets::ConstraintF;
-    use ark_ff::{Zero, One};
+    use ark_ff::{One, Zero};
 
     #[test]
     fn test_u8_to_field_elements() {
