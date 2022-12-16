@@ -4,7 +4,7 @@ use crate::marlin::MarlinInst;
 use crate::marlin::MultiPC;
 use crate::merkle_tree::merkle_tree_verification_u8::MerkleTreeVerificationU8;
 use anyhow::{anyhow, Result};
-use ark_bls12_381::Fr;
+use ark_bls12_377::Fr;
 use ark_crypto_primitives::{
     crh::{TwoToOneCRH, CRH},
     merkle_tree::{constraints::PathVar, MerkleTree, Path},

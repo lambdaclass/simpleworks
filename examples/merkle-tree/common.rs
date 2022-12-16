@@ -49,4 +49,4 @@ pub type LeafHashParamsVar = <LeafHashGadget as CRHGadget<LeafHash, ConstraintF>
 pub type TwoToOneHashParamsVar =
     <TwoToOneHashGadget as TwoToOneCRHGadget<TwoToOneHash, ConstraintF>>::ParametersVar;
 
-pub type ConstraintF = ark_ed_on_bls12_381::Fq;
+pub type ConstraintF = ark_ed_on_bls12_377::Fq;

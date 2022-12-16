@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn test_address_to_string() {
-        let cs = ConstraintSystem::<ark_ed_on_bls12_381::Fq>::new_ref();
+        let cs = ConstraintSystem::<ark_ed_on_bls12_377::Fq>::new_ref();
         let address = AddressGadget::new_witness(Namespace::new(cs.clone(), None), || {
             Ok(b"aleo11111111111111111111111111111111111111111111111111111111111")
         })

@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use ark_bls12_381::{Bls12_381, Fr, FrParameters, Parameters};
+use ark_bls12_377::{Bls12_377, Fr, FrParameters, Parameters};
 use ark_ec::bls12::Bls12;
 use ark_ff::Fp256;
 use ark_marlin::{IndexProverKey, IndexVerifierKey, Marlin, Proof, SimpleHashFiatShamirRng};
@@ -9,7 +9,7 @@ use blake2::Blake2s;
 use rand::rngs::StdRng;
 use rand_chacha::ChaChaRng;
 
-pub type MultiPC = MarlinKZG10<Bls12_381, DensePolynomial<Fr>>;
+pub type MultiPC = MarlinKZG10<Bls12_377, DensePolynomial<Fr>>;
 pub type FS = SimpleHashFiatShamirRng<Blake2s, ChaChaRng>;
 pub type MarlinInst = Marlin<Fr, MultiPC, FS>;
 pub type UniversalSRS = ark_marlin::UniversalSRS<Fr, MultiPC>;
