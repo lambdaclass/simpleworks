@@ -4,7 +4,7 @@ mod tests {
         elgamal::{ElGamal, Randomness},
         AsymmetricEncryptionScheme,
     };
-    use ark_ed_on_bls12_381::EdwardsProjective as JubJub;
+    use ark_ed_on_bls12_377::EdwardsProjective as JubJub;
     use ark_std::{test_rng, UniformRand};
 
     type ElGamalCurve = ElGamal<JubJub>;

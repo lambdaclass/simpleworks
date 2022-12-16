@@ -4,7 +4,7 @@ use ark_crypto_primitives::{
     crh::injective_map::{PedersenCRHCompressor, TECompressor},
     CRH,
 };
-use ark_ed_on_bls12_381::{EdwardsProjective, Fq};
+use ark_ed_on_bls12_377::{EdwardsProjective, Fq};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 struct LeafWindow;

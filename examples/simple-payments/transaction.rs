@@ -3,7 +3,7 @@ use crate::ledger::{self, Amount};
 use anyhow::{anyhow, Result};
 use ark_crypto_primitives::signature::SigVerifyGadget;
 use ark_crypto_primitives::SignatureScheme;
-use ark_ed_on_bls12_381::EdwardsProjective;
+use ark_ed_on_bls12_377::EdwardsProjective;
 use ark_r1cs_std::{
     prelude::{AllocVar, Boolean, EqGadget},
     uint8::UInt8,

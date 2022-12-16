@@ -62,7 +62,7 @@ fn main() {}
 #[cfg(test)]
 mod test {
     use crate::*;
-    use ark_bls12_381::{Bls12_381, Fr};
+    use ark_bls12_377::{Bls12_377, Fr};
     use ark_crypto_primitives::SignatureScheme;
     use ark_marlin::{Marlin, SimpleHashFiatShamirRng};
     use ark_poly::univariate::DensePolynomial;

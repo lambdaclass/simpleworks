@@ -10,10 +10,10 @@ pub struct TestCircuit {
     pub b: u8,
 }
 
-impl ConstraintSynthesizer<ark_ed_on_bls12_381::Fq> for TestCircuit {
+impl ConstraintSynthesizer<ark_ed_on_bls12_377::Fq> for TestCircuit {
     fn generate_constraints(
         self,
-        cs: ConstraintSystemRef<ark_ed_on_bls12_381::Fq>,
+        cs: ConstraintSystemRef<ark_ed_on_bls12_377::Fq>,
     ) -> Result<(), SynthesisError> {
         let a = UInt8::new_witness(ark_relations::ns!(cs, "a"), || Ok(self.a))?;
 
