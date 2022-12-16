@@ -8,22 +8,22 @@ use ark_relations::r1cs::{
 /// Circuit that will test whether the two given numbers are equal
 pub struct TestCircuit {
     /// Public input
-    pub a: ark_ed_on_bls12_381::Fq,
+    pub a: ark_ed_on_bls12_377::Fq,
     /// Private input
-    pub b: ark_ed_on_bls12_381::Fq,
+    pub b: ark_ed_on_bls12_377::Fq,
 }
 
-impl ConstraintSynthesizer<ark_ed_on_bls12_381::Fq> for TestCircuit {
+impl ConstraintSynthesizer<ark_ed_on_bls12_377::Fq> for TestCircuit {
     fn generate_constraints(
         self,
-        cs: ConstraintSystemRef<ark_ed_on_bls12_381::Fq>,
+        cs: ConstraintSystemRef<ark_ed_on_bls12_377::Fq>,
     ) -> Result<(), SynthesisError> {
         let a = cs.new_input_variable(|| Ok(self.a))?;
 
         let b = cs.new_witness_variable(|| Ok(self.b))?;
 
-        let difference: LinearCombination<ark_ed_on_bls12_381::Fq> = lc!() + a - b;
-        let true_variable = &Boolean::<ark_ed_on_bls12_381::Fq>::TRUE;
+        let difference: LinearCombination<ark_ed_on_bls12_377::Fq> = lc!() + a - b;
+        let true_variable = &Boolean::<ark_ed_on_bls12_377::Fq>::TRUE;
         cs.enforce_constraint(difference, true_variable.lc(), lc!())?;
 
         Ok(())
@@ -72,14 +72,14 @@ mod tests {
 
     use ark_marlin::{Marlin, SimpleHashFiatShamirRng};
 
-    use ark_bls12_381::{Bls12_381, Fr};
+    use ark_bls12_377::{Bls12_377, Fr};
     use ark_ff::BigInteger256;
     use ark_poly::univariate::DensePolynomial;
     use ark_poly_commit::marlin_pc::MarlinKZG10;
     use blake2::Blake2s;
     use rand_chacha::ChaChaRng;
 
-    type MultiPC = MarlinKZG10<Bls12_381, DensePolynomial<Fr>>;
+    type MultiPC = MarlinKZG10<Bls12_377, DensePolynomial<Fr>>;
     type FS = SimpleHashFiatShamirRng<Blake2s, ChaChaRng>;
     type MarlinInst = Marlin<Fr, MultiPC, FS>;
 

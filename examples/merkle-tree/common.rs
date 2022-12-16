@@ -6,7 +6,7 @@ use ark_crypto_primitives::crh::{
     injective_map::{PedersenCRHCompressor, TECompressor},
     pedersen,
 };
-use ark_ed_on_bls12_381::{constraints::EdwardsVar, EdwardsProjective};
+use ark_ed_on_bls12_377::{constraints::EdwardsVar, EdwardsProjective};
 
 pub type TwoToOneHash = PedersenCRHCompressor<EdwardsProjective, TECompressor, TwoToOneWindow>;
 #[derive(Clone, PartialEq, Eq, Hash)]

@@ -6,7 +6,7 @@ use ark_crypto_primitives::crh::{
 };
 use ark_crypto_primitives::merkle_tree::{self, MerkleTree, Path};
 use ark_crypto_primitives::SignatureScheme;
-use ark_ed_on_bls12_381::EdwardsProjective;
+use ark_ed_on_bls12_377::EdwardsProjective;
 use ark_std::rand::rngs::StdRng;
 use ark_std::rand::Rng;
 use simpleworks::schnorr_signature::schnorr;
