@@ -5,6 +5,8 @@ use ark_r1cs_std::{
 mod address;
 pub use address::Address;
 
+mod boolean;
+
 mod uint128;
 mod uint16;
 mod uint32;
