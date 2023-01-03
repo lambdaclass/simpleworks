@@ -4,8 +4,9 @@ use ark_r1cs_std::prelude::Boolean;
 
 impl<F: Field> IsWitness<F> for Boolean<F> {
     fn is_witness(&self) -> anyhow::Result<bool>
-        where
-            Self: ark_r1cs_std::ToBytesGadget<F>, {
+    where
+        Self: ark_r1cs_std::ToBytesGadget<F>,
+    {
         if let ark_r1cs_std::prelude::Boolean::Is(bool)
         | ark_r1cs_std::prelude::Boolean::Not(bool) = self
         {
