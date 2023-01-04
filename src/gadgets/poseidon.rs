@@ -1,24 +1,31 @@
 use ark_ff::PrimeField;
 use ark_r1cs_std::R1CSVar;
-use ark_sponge::{poseidon::{constraints::PoseidonSpongeVar, PoseidonParameters}, constraints::{CryptographicSpongeVar, AbsorbGadget}};
+use ark_sponge::{
+    constraints::{AbsorbGadget, CryptographicSpongeVar},
+    poseidon::{constraints::PoseidonSpongeVar, PoseidonParameters},
+};
 
 use super::{ConstraintF, UInt8Gadget};
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
 type PoseidonGadget = PoseidonSpongeVar<ConstraintF>;
 
 pub fn poseidon2_hash(input: &impl AbsorbGadget<ConstraintF>) -> Result<Vec<UInt8Gadget>> {
     let input_bytes = input.to_sponge_bytes()?;
-    
-    let cs = input_bytes.first().ok_or_else(|| anyhow!("Error getting the first element of the input"))?.cs();
+
+    let cs = input_bytes
+        .first()
+        .ok_or_else(|| anyhow!("Error getting the first element of the input"))?
+        .cs();
 
     let sponge_params = poseidon_parameters_for_test()?;
-    
+
     let mut constraint_sponge = PoseidonGadget::new(cs, &sponge_params);
-    
+
     constraint_sponge.absorb(&input)?;
-    constraint_sponge.squeeze_bytes(input_bytes.len()).map_err(|e| anyhow!(e.to_string()))
-    
+    constraint_sponge
+        .squeeze_bytes(input_bytes.len())
+        .map_err(|e| anyhow!(e.to_string()))
 }
 
 /// Generate default parameters (bls381-fr-only) for alpha = 17, state-size = 8
@@ -602,17 +609,19 @@ pub(crate) fn poseidon_parameters_for_test<F: PrimeField>() -> Result<PoseidonPa
 
 #[cfg(test)]
 mod tests {
+    use crate::gadgets::{
+        poseidon::poseidon_parameters_for_test, poseidon2_hash, ConstraintF, UInt8Gadget,
+    };
     use ark_r1cs_std::R1CSVar;
-    use crate::gadgets::{ConstraintF, poseidon::poseidon_parameters_for_test, UInt8Gadget, poseidon2_hash};
-    use ark_relations::{r1cs::ConstraintSystem, ns};
+    use ark_relations::{ns, r1cs::ConstraintSystem};
     use ark_sponge::{poseidon::PoseidonSponge, CryptographicSponge};
 
     #[test]
-    fn test_poseidon2_hash() {
+    fn test_poseidon2_hash_primitive_and_gadget_implementations_comparison() {
         let cs = ConstraintSystem::new_ref();
-        
+
         let sponge_params = poseidon_parameters_for_test().unwrap();
-        
+
         let input: Vec<_> = (0..8).map(|i| vec![i, i + 1, i + 2]).collect();
         let mut native_sponge = PoseidonSponge::<ConstraintF>::new(&sponge_params);
         native_sponge.absorb(&input);
@@ -624,10 +633,20 @@ mod tests {
             .collect();
         let squeeze_var = poseidon2_hash(&input_var).unwrap();
 
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(squeeze_var.value().unwrap(), primitive_squeeze);
+    }
+
+    #[test]
+    fn test_hashed_message_is_not_the_same() {
+        let cs = ConstraintSystem::new_ref();
+
+        let message = b"Hello World";
+
+        let input_var = UInt8Gadget::new_input_vec(ns!(cs, "input"), message).unwrap();
+        let output_var = poseidon2_hash(&input_var).unwrap();
 
         assert!(cs.is_satisfied().unwrap());
-        // println!("{:?}", squeeze_var.iter().map(|b| b.value().unwrap()).collect::<Vec<_>>());
-        // println!("{primitive_squeeze:?}");
-        assert_eq!(squeeze_var.value().unwrap(), primitive_squeeze);
+        assert_ne!(output_var.value().unwrap(), message);
     }
 }
