@@ -7,6 +7,9 @@ pub use address::Address;
 
 mod boolean;
 
+mod poseidon;
+pub use poseidon::poseidon2_hash;
+
 mod uint128;
 mod uint16;
 mod uint32;
