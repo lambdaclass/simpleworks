@@ -1,6 +1,8 @@
 use anyhow::{anyhow, Result};
 use ark_ff::Field;
-use ark_r1cs_std::{ToBitsGadget, ToBytesGadget};
+use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
+
+use super::UInt8Gadget;
 
 pub trait ToFieldElements<F: Field> {
     fn to_field_elements(&self) -> Result<Vec<F>>;
@@ -27,6 +29,16 @@ pub trait IsWitness<F: Field> {
 
         bit.is_witness()
     }
+}
+
+pub trait FromBytesGadget<F: Field> {
+    fn from_bytes_le(bytes: &[UInt8<F>]) -> Result<Self>
+    where
+        Self: Sized;
+
+    fn from_bytes_be(bytes: &[UInt8<F>]) -> Result<Self>
+    where
+        Self: Sized;
 }
 
 /* ToFieldElements implementations */
