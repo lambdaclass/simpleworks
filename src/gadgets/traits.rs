@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use ark_ff::Field;
-use ark_r1cs_std::{ToBitsGadget, ToBytesGadget, uint8::UInt8};
+use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
 
 use super::UInt8Gadget;
 
@@ -35,7 +35,7 @@ pub trait FromBytesGadget<F: Field> {
     fn from_bytes_le(bytes: &[UInt8<F>]) -> Result<Self>
     where
         Self: Sized;
-    
+
     fn from_bytes_be(bytes: &[UInt8<F>]) -> Result<Self>
     where
         Self: Sized;
@@ -132,8 +132,6 @@ impl<F: Field> ToFieldElements<F> for [u8; 63] {
         Ok(field_elements)
     }
 }
-
-
 
 #[cfg(test)]
 mod test {
