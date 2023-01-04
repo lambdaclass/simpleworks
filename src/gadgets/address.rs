@@ -1,5 +1,5 @@
-use super::traits::{IsWitness, ToFieldElements};
-use anyhow::Result;
+use super::traits::{IsWitness, ToFieldElements, FromBytesGadget};
+use anyhow::{Result, ensure};
 use ark_ff::Field;
 use ark_r1cs_std::{
     prelude::{AllocVar, AllocationMode, Boolean, EqGadget},
@@ -19,6 +19,22 @@ pub struct Address<F: Field> {
     /// Little-endian representation: least significant bit first
     pub(crate) bytes: Vec<UInt8<F>>,
     pub(crate) value: Option<[u8; 63]>,
+}
+
+impl<ConstraintF: Field> Address<ConstraintF> {
+    pub fn to_bytes_be(&self) -> Result<Vec<UInt8<ConstraintF>>> {
+        let mut bits = self.to_bits_le()?;
+        bits.reverse();
+    
+        let bytes_be = bits.chunks_mut(8)
+            .map(|chunk| {
+                chunk.reverse();
+                UInt8::<ConstraintF>::from_bits_le(chunk)
+            })
+            .collect();
+
+        Ok(bytes_be)
+    }
 }
 
 impl<ConstraintF: Field> AllocVar<[u8; 63], ConstraintF> for Address<ConstraintF> {
@@ -166,12 +182,44 @@ impl<ConstraintF: Field> CondSelectGadget<ConstraintF> for Address<ConstraintF> 
     }
 }
 
+impl<F: Field> ToBitsGadget<F> for Address<F> {
+    fn to_bits_le(&self) -> Result<Vec<Boolean<F>>, SynthesisError> {
+        self.bytes.to_bits_le()
+    }
+
+    fn to_bits_be(&self) -> Result<Vec<Boolean<F>>, SynthesisError> {
+        self.bytes.to_bits_be()
+    }
+}
+
+impl<F: Field> FromBytesGadget<F> for Address<F> {
+    fn from_bytes_le(bytes: &[UInt8<F>]) -> Result<Self>
+    where
+        Self: Sized {
+            ensure!(bytes.len() == 63, "Address must be 63 bytes long");
+            let mut value = [0_u8; 63];
+            for (primitive_byte, byte_gadget) in value.iter_mut().zip(bytes) {
+                *primitive_byte = byte_gadget.value()?;
+            }
+            
+            Ok(Self { bytes: bytes.to_vec(), value: Some(value) })
+    }
+
+    fn from_bytes_be(bytes: &[UInt8<F>]) -> Result<Self>
+    where
+        Self: Sized {
+        let mut reversed_bytes = bytes.to_vec();
+        reversed_bytes.reverse();
+        Self::from_bytes_le(&reversed_bytes)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::gadgets::ConstraintF;
+    use crate::gadgets::{ConstraintF, traits::FromBytesGadget};
 
     use super::super::AddressGadget;
-    use ark_r1cs_std::{alloc::AllocVar, prelude::Boolean, select::CondSelectGadget, R1CSVar};
+    use ark_r1cs_std::{alloc::AllocVar, prelude::Boolean, select::CondSelectGadget, R1CSVar, ToBytesGadget};
     use ark_relations::r1cs::{ConstraintSystem, Namespace};
 
     #[test]
@@ -250,5 +298,35 @@ mod tests {
                 .unwrap(),
             false_value.value().unwrap()
         );
+    }
+
+    #[test]
+    fn test_from_bytes_le_gadget() {
+        let cs = ConstraintSystem::<ark_ed_on_bls12_377::Fq>::new_ref();
+
+        let address = AddressGadget::new_witness(Namespace::new(cs, None), || {
+            Ok(b"aleo11111111111111111111111111111111111111111111111111111111111")
+        })
+        .unwrap();
+        let address_bytes = address.to_bytes().unwrap();
+
+        let address_from_bytes = AddressGadget::from_bytes_le(&address_bytes).unwrap();
+
+        assert_eq!(address.value().unwrap(), address_from_bytes.value().unwrap());
+    }
+
+    #[test]
+    fn test_from_bytes_be_gadget() {
+        let cs = ConstraintSystem::<ark_ed_on_bls12_377::Fq>::new_ref();
+
+        let address = AddressGadget::new_witness(Namespace::new(cs, None), || {
+            Ok(b"aleo11111111111111111111111111111111111111111111111111111111111")
+        })
+        .unwrap();
+        let address_bytes = address.to_bytes_be().unwrap();
+
+        let address_from_bytes = AddressGadget::from_bytes_be(&address_bytes).unwrap();
+
+        assert_eq!(address.value().unwrap(), address_from_bytes.value().unwrap());
     }
 }
