@@ -3,6 +3,7 @@ use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{
     prelude::{AllocVar, AllocationMode, Boolean, EqGadget},
+    select::CondSelectGadget,
     uint8::UInt8,
     R1CSVar, ToBitsGadget, ToBytesGadget,
 };
@@ -137,10 +138,40 @@ impl<F: Field> ToBytesGadget<F> for Address<F> {
 
 impl<F: Field> IsWitness<F> for Address<F> {}
 
+impl<ConstraintF: Field> CondSelectGadget<ConstraintF> for Address<ConstraintF> {
+    fn conditionally_select(
+        cond: &Boolean<ConstraintF>,
+        true_value: &Self,
+        false_value: &Self,
+    ) -> Result<Self, SynthesisError> {
+        let selected_bytes = true_value
+            .bytes
+            .iter()
+            .zip(&false_value.bytes)
+            .map(|(t, f)| UInt8::conditionally_select(cond, t, f));
+        let mut bytes = vec![UInt8::constant(0); 63];
+        for (result, new) in bytes.iter_mut().zip(selected_bytes) {
+            *result = new?;
+        }
+
+        let value = cond.value().ok().and_then(|cond| {
+            if cond {
+                true_value.value
+            } else {
+                false_value.value
+            }
+        });
+
+        Ok(Self { bytes, value })
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::gadgets::ConstraintF;
+
     use super::super::AddressGadget;
-    use ark_r1cs_std::alloc::AllocVar;
+    use ark_r1cs_std::{alloc::AllocVar, prelude::Boolean, select::CondSelectGadget, R1CSVar};
     use ark_relations::r1cs::{ConstraintSystem, Namespace};
 
     #[test]
@@ -172,6 +203,52 @@ mod tests {
         assert_eq!(
             "\"aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d\"",
             serialized
+        );
+    }
+
+    #[test]
+    fn test_conditionally_select_true_value() {
+        let cs = ConstraintSystem::<ark_ed_on_bls12_377::Fq>::new_ref();
+
+        let condition = Boolean::<ConstraintF>::new_witness(cs.clone(), || Ok(true)).unwrap();
+        let true_value = AddressGadget::new_witness(Namespace::new(cs.clone(), None), || {
+            Ok(b"aleo11111111111111111111111111111111111111111111111111111111111")
+        })
+        .unwrap();
+        let false_value = AddressGadget::new_witness(Namespace::new(cs, None), || {
+            Ok(b"aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d")
+        })
+        .unwrap();
+
+        assert_eq!(
+            AddressGadget::conditionally_select(&condition, &true_value, &false_value)
+                .unwrap()
+                .value()
+                .unwrap(),
+            true_value.value().unwrap()
+        );
+    }
+
+    #[test]
+    fn test_conditionally_select_false_value() {
+        let cs = ConstraintSystem::<ark_ed_on_bls12_377::Fq>::new_ref();
+
+        let condition = Boolean::<ConstraintF>::new_witness(cs.clone(), || Ok(false)).unwrap();
+        let true_value = AddressGadget::new_witness(Namespace::new(cs.clone(), None), || {
+            Ok(b"aleo11111111111111111111111111111111111111111111111111111111111")
+        })
+        .unwrap();
+        let false_value = AddressGadget::new_witness(Namespace::new(cs, None), || {
+            Ok(b"aleo13rgfynqdpvega6f5gwvajt8w0cnrmvy0zzg9tqmuc5y4upk2vs9sgk3a3d")
+        })
+        .unwrap();
+
+        assert_eq!(
+            AddressGadget::conditionally_select(&condition, &true_value, &false_value)
+                .unwrap()
+                .value()
+                .unwrap(),
+            false_value.value().unwrap()
         );
     }
 }
