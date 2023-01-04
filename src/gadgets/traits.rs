@@ -25,13 +25,7 @@ pub trait IsWitness<F: Field> {
             .ok_or("Error getting the first Boolean bit")
             .map_err(|e| anyhow!("{}", e))?;
 
-        if let ark_r1cs_std::prelude::Boolean::Is(bool)
-        | ark_r1cs_std::prelude::Boolean::Not(bool) = bit
-        {
-            Ok(bool.variable().is_witness())
-        } else {
-            Ok(false)
-        }
+        bit.is_witness()
     }
 }
 
