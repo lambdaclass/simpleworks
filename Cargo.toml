@@ -24,6 +24,7 @@ ark-r1cs-std = { version = "^0.3.0", default-features = false }
 ark-snark = { version = "^0.3.0", default-features = false }
 ark-serialize = { version = "^0.3.0", default-features = false }
 ark-crypto-primitives = { version = "^0.3.0", default-features = true, features = [ "r1cs" ] }
+ark-sponge = { version = "^0.3.0", default-features = false, features = ["r1cs"] }
 
 # we use our fork of marlin crate, branch "use-constraint-system-directly"
 ark-marlin = { git = "https://github.com/Entropy1729/marlin.git", branch = "use-constraint-system-directly" }
