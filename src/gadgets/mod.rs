@@ -1,5 +1,6 @@
 use ark_r1cs_std::{
-    uint128::UInt128, uint16::UInt16, uint32::UInt32, uint64::UInt64, uint8::UInt8,
+    fields::fp::FpVar, uint128::UInt128, uint16::UInt16, uint32::UInt32, uint64::UInt64,
+    uint8::UInt8,
 };
 
 mod address;
@@ -28,3 +29,4 @@ pub type UInt32Gadget = UInt32<ConstraintF>;
 pub type UInt64Gadget = UInt64<ConstraintF>;
 pub type UInt128Gadget = UInt128<ConstraintF>;
 pub type AddressGadget = Address<ConstraintF>;
+pub type FieldGadget = FpVar<ConstraintF>;
