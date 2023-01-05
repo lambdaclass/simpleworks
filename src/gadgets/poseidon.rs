@@ -1,14 +1,11 @@
-use ark_ff::PrimeField;
+use super::ConstraintF;
+use crate::hash;
+use anyhow::{anyhow, Result};
 use ark_r1cs_std::{fields::fp::FpVar, R1CSVar};
 use ark_sponge::{
     constraints::{AbsorbGadget, CryptographicSpongeVar},
-    poseidon::{constraints::PoseidonSpongeVar, PoseidonParameters},
+    poseidon::constraints::PoseidonSpongeVar,
 };
-
-use crate::hash;
-
-use super::{ConstraintF, UInt8Gadget};
-use anyhow::{anyhow, Result};
 
 type PoseidonGadget = PoseidonSpongeVar<ConstraintF>;
 
