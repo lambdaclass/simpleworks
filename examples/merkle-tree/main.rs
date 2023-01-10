@@ -85,7 +85,7 @@ impl ConstraintSynthesizer<ConstraintF> for MerkleTreeVerification {
 #[cfg(test)]
 mod tests {
     use super::{LeafHash, MerkleTreeVerification, TwoToOneCRH, TwoToOneHash, CRH};
-    use ark_bls12_381::{Bls12_381, Fr};
+    use ark_bls12_377::{Bls12_377, Fr};
     use ark_marlin::{Marlin, SimpleHashFiatShamirRng};
     use ark_poly::univariate::DensePolynomial;
     use ark_poly_commit::marlin_pc::MarlinKZG10;
@@ -93,7 +93,7 @@ mod tests {
     use blake2::Blake2s;
     use rand_chacha::ChaChaRng;
 
-    type MultiPC = MarlinKZG10<Bls12_381, DensePolynomial<Fr>>;
+    type MultiPC = MarlinKZG10<Bls12_377, DensePolynomial<Fr>>;
     type FS = SimpleHashFiatShamirRng<Blake2s, ChaChaRng>;
     type MarlinInst = Marlin<Fr, MultiPC, FS>;
 

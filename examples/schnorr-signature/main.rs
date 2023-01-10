@@ -72,7 +72,7 @@ mod test {
     use blake2::Blake2s;
     use rand_chacha::ChaChaRng;
 
-    type MultiPC = MarlinKZG10<Bls12_381, DensePolynomial<Fr>>;
+    type MultiPC = MarlinKZG10<Bls12_377, DensePolynomial<Fr>>;
     type FS = SimpleHashFiatShamirRng<Blake2s, ChaChaRng>;
     type MarlinInst = Marlin<Fr, MultiPC, FS>;
 
