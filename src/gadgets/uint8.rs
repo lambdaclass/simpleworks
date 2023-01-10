@@ -56,6 +56,45 @@ impl<F: Field> BitRotationGadget<F> for UInt8<F> {
     }
 }
 
+impl<F: Field> BitRotationGadget<F> for [UInt8<F>; 4] {
+    fn rotate_left(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self> {
+        let primitive_bits = self.to_bits_be()?;
+        let mut rotated_bits = primitive_bits.clone();
+        rotated_bits.rotate_left(positions);
+
+        for i in 0..self.len() {
+            let a = &primitive_bits[(i + positions) % self.len()];
+            let b = &rotated_bits[i];
+            let c = lc!() + a.lc() - b.lc();
+            constraint_system.enforce_constraint(lc!(), lc!(), c)?
+        }
+
+        rotated_bits.reverse();
+        let mut result = [UInt8::<F>::constant(0), UInt8::<F>::constant(0), UInt8::<F>::constant(0), UInt8::<F>::constant(0)];
+        for (result_byte, result_chunk_byte) in result.iter_mut().zip(rotated_bits.chunks(8)) {
+            *result_byte = UInt8::<F>::from_bits_le(result_chunk_byte);
+        }
+
+        Ok(result)
+    }
+
+    fn rotate_right(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self> {
+        // Example: rotate one place to the right is the same as rotate 7 places
+        // to the left while generating the same number of constraints.
+        // We compute positions % 8 to avoid subtraction overflow when someone
+        // tries to rotate more then 8 positions.
+        self.rotate_left(self.len() - (positions % self.len()), constraint_system)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::gadgets::{traits::BitRotationGadget, ConstraintF, UInt8Gadget};
