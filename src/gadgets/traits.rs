@@ -293,45 +293,18 @@ mod test {
             *sender_address_byte = *address_string_byte;
         }
 
-        // 59 "1"s
+        // "a"
         let mut expected_field_elements = vec![
-            vec![
-                ConstraintF::one(),
-                ConstraintF::zero(),
-                ConstraintF::zero(),
-                ConstraintF::zero(),
-                ConstraintF::one(),
-                ConstraintF::one(),
-                ConstraintF::zero(),
-                ConstraintF::zero(),
-            ];
-            59
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<ConstraintF>>();
-        // "o"
-        expected_field_elements.extend_from_slice(&[
-            ConstraintF::one(),
-            ConstraintF::one(),
-            ConstraintF::one(),
             ConstraintF::one(),
             ConstraintF::zero(),
-            ConstraintF::one(),
-            ConstraintF::one(),
             ConstraintF::zero(),
-        ]);
-        // "e"
-        expected_field_elements.extend_from_slice(&[
-            ConstraintF::one(),
-            ConstraintF::zero(),
-            ConstraintF::one(),
             ConstraintF::zero(),
             ConstraintF::zero(),
             ConstraintF::one(),
             ConstraintF::one(),
             ConstraintF::zero(),
-        ]);
+        ];
+
         // "l"
         expected_field_elements.extend_from_slice(&[
             ConstraintF::zero(),
@@ -343,17 +316,50 @@ mod test {
             ConstraintF::one(),
             ConstraintF::zero(),
         ]);
-        // "a"
+
+        // "e"
         expected_field_elements.extend_from_slice(&[
             ConstraintF::one(),
             ConstraintF::zero(),
-            ConstraintF::zero(),
+            ConstraintF::one(),
             ConstraintF::zero(),
             ConstraintF::zero(),
             ConstraintF::one(),
             ConstraintF::one(),
             ConstraintF::zero(),
         ]);
+
+        // "o"
+        expected_field_elements.extend_from_slice(&[
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+        ]);
+
+        // 59 "1"s
+        expected_field_elements.extend_from_slice(
+            &vec![
+                vec![
+                    ConstraintF::one(),
+                    ConstraintF::zero(),
+                    ConstraintF::zero(),
+                    ConstraintF::zero(),
+                    ConstraintF::one(),
+                    ConstraintF::one(),
+                    ConstraintF::zero(),
+                    ConstraintF::zero(),
+                ];
+                59
+            ]
+            .into_iter()
+            .flatten()
+            .collect::<Vec<ConstraintF>>(),
+        );
 
         assert_eq!(expected_field_elements.len(), address.len() * 8);
         assert_eq!(
