@@ -74,7 +74,12 @@ impl<F: Field> BitRotationGadget<F> for [UInt8<F>; 4] {
         }
 
         rotated_bits.reverse();
-        let mut result = [UInt8::<F>::constant(0), UInt8::<F>::constant(0), UInt8::<F>::constant(0), UInt8::<F>::constant(0)];
+        let mut result = [
+            UInt8::<F>::constant(0),
+            UInt8::<F>::constant(0),
+            UInt8::<F>::constant(0),
+            UInt8::<F>::constant(0),
+        ];
         for (result_byte, result_chunk_byte) in result.iter_mut().zip(rotated_bits.chunks(8)) {
             *result_byte = UInt8::<F>::from_bits_le(result_chunk_byte);
         }
