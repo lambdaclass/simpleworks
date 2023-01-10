@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
 use ark_ff::Field;
 use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
+use ark_relations::r1cs::ConstraintSystemRef;
 
 use super::UInt8Gadget;
 
@@ -39,6 +40,12 @@ pub trait FromBytesGadget<F: Field> {
     fn from_bytes_be(bytes: &[UInt8<F>]) -> Result<Self>
     where
         Self: Sized;
+}
+
+pub trait BitRotationGadget<F: Field> {
+    fn rotate_left(&self, positions: usize, constraint_system: ConstraintSystemRef<F>) -> Result<Self> where Self: std::marker::Sized;
+
+    fn rotate_right(&self, positions: usize, constraint_system: ConstraintSystemRef<F>) -> Result<Self> where Self: std::marker::Sized;
 }
 
 /* ToFieldElements implementations */
