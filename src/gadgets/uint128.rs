@@ -1,8 +1,8 @@
-use super::traits::{FromBytesGadget, IsWitness, ToFieldElements, BitRotationGadget};
+use super::traits::{BitRotationGadget, FromBytesGadget, IsWitness, ToFieldElements};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{prelude::Boolean, uint128::UInt128, uint8::UInt8, R1CSVar, ToBitsGadget};
-use ark_relations::{r1cs::ConstraintSystemRef, lc};
+use ark_relations::{lc, r1cs::ConstraintSystemRef};
 
 impl<F: Field> ToFieldElements<F> for UInt128<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
@@ -50,7 +50,11 @@ impl<F: Field> FromBytesGadget<F> for UInt128<F> {
 }
 
 impl<F: Field> BitRotationGadget<F> for UInt128<F> {
-    fn rotate_left(&self, positions: usize, constraint_system: ConstraintSystemRef<F>) -> Result<Self> {
+    fn rotate_left(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self> {
         let mut primitive_bits = self.to_bits_le();
         primitive_bits.reverse();
         let mut rotated_bits = primitive_bits.clone();
@@ -67,8 +71,12 @@ impl<F: Field> BitRotationGadget<F> for UInt128<F> {
         Ok(UInt128::<F>::from_bits_le(&rotated_bits))
     }
 
-    fn rotate_right(&self, positions: usize, constraint_system: ConstraintSystemRef<F>) -> Result<Self> {
-        // Example: rotate one place to the right is the same as rotate 7 places 
+    fn rotate_right(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self> {
+        // Example: rotate one place to the right is the same as rotate 7 places
         // to the left while generating the same number of constraints.
         // We compute positions % 128 to avoid subtraction overflow when someone
         // tries to rotate more then 128 positions.
@@ -78,7 +86,7 @@ impl<F: Field> BitRotationGadget<F> for UInt128<F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{gadgets::{UInt128Gadget, ConstraintF, traits::BitRotationGadget}};
+    use crate::gadgets::{traits::BitRotationGadget, ConstraintF, UInt128Gadget};
     use ark_r1cs_std::{prelude::AllocVar, R1CSVar};
     use ark_relations::r1cs::ConstraintSystem;
 
@@ -89,7 +97,9 @@ mod tests {
         let positions_to_rotate = 1;
         let expected_byte = byte.value().unwrap().rotate_left(positions_to_rotate);
 
-        let result = byte.rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
@@ -103,7 +113,9 @@ mod tests {
         let positions_to_rotate = 2;
         let expected_byte = byte.value().unwrap().rotate_left(positions_to_rotate);
 
-        let result = byte.rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
@@ -117,7 +129,9 @@ mod tests {
         let positions_to_rotate = 1;
         let expected_byte = byte.value().unwrap().rotate_right(positions_to_rotate);
 
-        let result = byte.rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
@@ -131,7 +145,9 @@ mod tests {
         let positions_to_rotate = 2;
         let expected_byte = byte.value().unwrap().rotate_right(positions_to_rotate);
 
-        let result = byte.rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());

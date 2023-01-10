@@ -1,4 +1,4 @@
-use super::traits::{IsWitness, ToFieldElements, BitRotationGadget};
+use super::traits::{BitRotationGadget, IsWitness, ToFieldElements};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{uint8::UInt8, R1CSVar, ToBitsGadget};
@@ -23,7 +23,11 @@ impl<F: Field> ToFieldElements<F> for UInt8<F> {
 impl<F: Field> IsWitness<F> for [UInt8<F>] {}
 
 impl<F: Field> BitRotationGadget<F> for UInt8<F> {
-    fn rotate_left(&self, positions: usize, constraint_system: ConstraintSystemRef<F>) -> Result<Self> {
+    fn rotate_left(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self> {
         let primitive_bits = self.to_bits_be()?;
         let mut rotated_bits = primitive_bits.clone();
         rotated_bits.rotate_left(positions);
@@ -39,8 +43,12 @@ impl<F: Field> BitRotationGadget<F> for UInt8<F> {
         Ok(UInt8::<F>::from_bits_le(&rotated_bits))
     }
 
-    fn rotate_right(&self, positions: usize, constraint_system: ConstraintSystemRef<F>) -> Result<Self> {
-        // Example: rotate one place to the right is the same as rotate 7 places 
+    fn rotate_right(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self> {
+        // Example: rotate one place to the right is the same as rotate 7 places
         // to the left while generating the same number of constraints.
         // We compute positions % 8 to avoid subtraction overflow when someone
         // tries to rotate more then 8 positions.
@@ -50,7 +58,7 @@ impl<F: Field> BitRotationGadget<F> for UInt8<F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{gadgets::{UInt8Gadget, ConstraintF, traits::BitRotationGadget}};
+    use crate::gadgets::{traits::BitRotationGadget, ConstraintF, UInt8Gadget};
     use ark_r1cs_std::{prelude::AllocVar, R1CSVar};
     use ark_relations::r1cs::ConstraintSystem;
 
@@ -61,7 +69,9 @@ mod tests {
         let positions_to_rotate = 1;
         let expected_byte = byte.value().unwrap().rotate_left(positions_to_rotate);
 
-        let result = byte.rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
@@ -74,7 +84,9 @@ mod tests {
         let positions_to_rotate = 2;
         let expected_byte = byte.value().unwrap().rotate_left(positions_to_rotate);
 
-        let result = byte.rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_left(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
@@ -87,7 +99,9 @@ mod tests {
         let positions_to_rotate = 1;
         let expected_byte = byte.value().unwrap().rotate_right(positions_to_rotate);
 
-        let result = byte.rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
@@ -101,7 +115,9 @@ mod tests {
         let positions_to_rotate = 2;
         let expected_byte = byte.value().unwrap().rotate_right(positions_to_rotate);
 
-        let result = byte.rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone()).unwrap();
+        let result = byte
+            .rotate_right(positions_to_rotate.try_into().unwrap(), cs.clone())
+            .unwrap();
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
