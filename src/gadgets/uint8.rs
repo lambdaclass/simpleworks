@@ -1,8 +1,11 @@
-use super::traits::{BitRotationGadget, IsWitness, ToFieldElements, BitShiftGadget};
+use super::traits::{BitRotationGadget, BitShiftGadget, IsWitness, ToFieldElements};
 use anyhow::Result;
 use ark_ff::Field;
-use ark_r1cs_std::{uint8::UInt8, R1CSVar, ToBitsGadget, prelude::AllocVar};
-use ark_relations::{lc, r1cs::{ConstraintSystemRef, SynthesisError}};
+use ark_r1cs_std::{prelude::AllocVar, uint8::UInt8, R1CSVar, ToBitsGadget};
+use ark_relations::{
+    lc,
+    r1cs::{ConstraintSystemRef, SynthesisError},
+};
 
 impl<F: Field> ToFieldElements<F> for UInt8<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
@@ -107,12 +110,19 @@ impl<F: Field> BitShiftGadget<F> for UInt8<F> {
         constraint_system: ConstraintSystemRef<F>,
     ) -> Result<Self>
     where
-        Self: std::marker::Sized {
+        Self: std::marker::Sized,
+    {
         let primitive_bits = self.to_bits_be()?;
-        let shifted_value= UInt8::<F>::new_witness(constraint_system.clone(), || {
-            let position_as_u32: u32 = positions.try_into().map_err(|_e| SynthesisError::Unsatisfiable)?;
+        let shifted_value = UInt8::<F>::new_witness(constraint_system.clone(), || {
+            let position_as_u32: u32 = positions
+                .try_into()
+                .map_err(|_e| SynthesisError::Unsatisfiable)?;
             let (shifted_value, shift_overflowed) = self.value()?.overflowing_shl(position_as_u32);
-            if shift_overflowed { Ok(0) } else { Ok(shifted_value) }
+            if shift_overflowed {
+                Ok(0)
+            } else {
+                Ok(shifted_value)
+            }
         })?;
         let shifted_bits = shifted_value.to_bits_be()?;
 
@@ -150,12 +160,19 @@ impl<F: Field> BitShiftGadget<F> for UInt8<F> {
         constraint_system: ConstraintSystemRef<F>,
     ) -> Result<Self>
     where
-        Self: std::marker::Sized {
+        Self: std::marker::Sized,
+    {
         let primitive_bits = self.to_bits_be()?;
-        let shifted_value= UInt8::<F>::new_witness(constraint_system.clone(), || {
-            let position_as_u32: u32 = positions.try_into().map_err(|_e| SynthesisError::Unsatisfiable)?;
+        let shifted_value = UInt8::<F>::new_witness(constraint_system.clone(), || {
+            let position_as_u32: u32 = positions
+                .try_into()
+                .map_err(|_e| SynthesisError::Unsatisfiable)?;
             let (shifted_value, shift_overflowed) = self.value()?.overflowing_shr(position_as_u32);
-            if shift_overflowed { Ok(0) } else { Ok(shifted_value) }
+            if shift_overflowed {
+                Ok(0)
+            } else {
+                Ok(shifted_value)
+            }
         })?;
         let shifted_bits = shifted_value.to_bits_be()?;
 
@@ -165,13 +182,10 @@ impl<F: Field> BitShiftGadget<F> for UInt8<F> {
             }
         } else {
             // Check that the first positions primitive bits are 0s.
-            shifted_bits
-                .iter()
-                .take(positions)
-                .try_for_each(|c| {
-                    constraint_system.enforce_constraint(lc!(), lc!(), c.lc())?;
-                    Ok::<_, anyhow::Error>(())
-                })?;
+            shifted_bits.iter().take(positions).try_for_each(|c| {
+                constraint_system.enforce_constraint(lc!(), lc!(), c.lc())?;
+                Ok::<_, anyhow::Error>(())
+            })?;
             // Check that the last len - positions bits are the first positions bits of the primitive bits.
             shifted_bits
                 .iter()
@@ -190,7 +204,10 @@ impl<F: Field> BitShiftGadget<F> for UInt8<F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::gadgets::{traits::{BitRotationGadget, BitShiftGadget}, ConstraintF, UInt8Gadget};
+    use crate::gadgets::{
+        traits::{BitRotationGadget, BitShiftGadget},
+        ConstraintF, UInt8Gadget,
+    };
     use ark_r1cs_std::{prelude::AllocVar, R1CSVar};
     use ark_relations::r1cs::ConstraintSystem;
 
@@ -363,7 +380,7 @@ mod tests {
     #[test]
     fn test_overflow_all_bits_right_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
-        let byte = UInt8Gadget::new_witness(cs.clone(), || Ok(0b1000_0000)).unwrap();
+        let byte = UInt8Gadget::new_witness(cs.clone(), || Ok(u8::MAX)).unwrap();
         let positions_to_shift = 8;
         let expected_byte = 0;
 
