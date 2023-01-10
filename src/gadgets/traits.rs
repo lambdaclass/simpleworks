@@ -48,7 +48,7 @@ impl<F: Field> ToFieldElements<F> for u8 {
         let field_elements = (0_u8..8_u8)
             .into_iter()
             .map(|bit_index| {
-                if self >> bit_index & 1 == 1 {
+                if (self >> bit_index) & 1 == 1 {
                     F::one()
                 } else {
                     F::zero()
@@ -126,7 +126,7 @@ impl<F: Field> ToFieldElements<F> for u128 {
 impl<F: Field> ToFieldElements<F> for [u8; 63] {
     fn to_field_elements(&self) -> Result<Vec<F>> {
         let mut field_elements = Vec::with_capacity(63 * 8);
-        for byte in self.iter().rev() {
+        for byte in self.iter() {
             field_elements.extend_from_slice(&ToFieldElements::<F>::to_field_elements(byte)?);
         }
         Ok(field_elements)
