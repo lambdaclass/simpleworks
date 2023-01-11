@@ -71,8 +71,12 @@ impl<F: Field> BitRotationGadget<F> for UInt128<F> {
         rotated_bits.rotate_left(positions);
 
         for i in 0..128 {
-            let a = &primitive_bits.get((i + positions) % 128).ok_or_else(|| anyhow!("Error getting element"))?;
-            let b = &rotated_bits.get(i).ok_or_else(|| anyhow!("Error getting element"))?;
+            let a = &primitive_bits
+                .get((i + positions) % 128)
+                .ok_or_else(|| anyhow!("Error getting element"))?;
+            let b = &rotated_bits
+                .get(i)
+                .ok_or_else(|| anyhow!("Error getting element"))?;
             let c = lc!() + a.lc() - b.lc();
             constraint_system.enforce_constraint(lc!(), lc!(), c)?;
         }

@@ -1,5 +1,5 @@
 use super::traits::{BitRotationGadget, BitShiftGadget, IsWitness, ToFieldElements};
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use ark_ff::Field;
 use ark_r1cs_std::{prelude::AllocVar, uint8::UInt8, R1CSVar, ToBitsGadget};
 use ark_relations::{
@@ -36,8 +36,12 @@ impl<F: Field> BitRotationGadget<F> for UInt8<F> {
         rotated_bits.rotate_left(positions);
 
         for i in 0..8 {
-            let a = &primitive_bits.get((i + positions) % 8).ok_or_else(|| anyhow!("Error getting element"))?;
-            let b = &rotated_bits.get(i).ok_or_else(|| anyhow!("Error getting element"))?;
+            let a = &primitive_bits
+                .get((i + positions) % 8)
+                .ok_or_else(|| anyhow!("Error getting element"))?;
+            let b = &rotated_bits
+                .get(i)
+                .ok_or_else(|| anyhow!("Error getting element"))?;
             let c = lc!() + a.lc() - b.lc();
             constraint_system.enforce_constraint(lc!(), lc!(), c)?;
         }
@@ -70,8 +74,12 @@ impl<F: Field> BitRotationGadget<F> for [UInt8<F>; 4] {
         rotated_bits.rotate_left(positions);
 
         for i in 0..self.len() {
-            let a = &primitive_bits.get((i + positions) % self.len()).ok_or_else(|| anyhow!("Error getting element"))?;
-            let b = &rotated_bits.get(i).ok_or_else(|| anyhow!("Error getting element"))?;
+            let a = &primitive_bits
+                .get((i + positions) % self.len())
+                .ok_or_else(|| anyhow!("Error getting element"))?;
+            let b = &rotated_bits
+                .get(i)
+                .ok_or_else(|| anyhow!("Error getting element"))?;
             let c = lc!() + a.lc() - b.lc();
             constraint_system.enforce_constraint(lc!(), lc!(), c)?;
         }
