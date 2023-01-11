@@ -78,6 +78,24 @@ pub trait BitShiftGadget<F: Field> {
         Self: std::marker::Sized;
 }
 
+pub trait ByteRotationGadget<F: Field> {
+    fn rotate_left(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn rotate_right(
+        &self,
+        positions: usize,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+}
+
 /* ToFieldElements implementations */
 
 impl<F: Field> ToFieldElements<F> for u8 {
