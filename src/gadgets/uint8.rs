@@ -1,4 +1,6 @@
-use super::traits::{BitRotationGadget, BitShiftGadget, IsWitness, ToFieldElements};
+use super::traits::{
+    BitRotationGadget, BitShiftGadget, ByteRotationGadget, IsWitness, ToFieldElements,
+};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{prelude::AllocVar, uint8::UInt8, R1CSVar, ToBitsGadget};
@@ -59,7 +61,7 @@ impl<F: Field> BitRotationGadget<F> for UInt8<F> {
     }
 }
 
-impl<F: Field> BitRotationGadget<F> for [UInt8<F>; 4] {
+impl<F: Field> ByteRotationGadget<F> for [UInt8<F>; 4] {
     fn rotate_left(
         &self,
         positions: usize,
@@ -67,10 +69,11 @@ impl<F: Field> BitRotationGadget<F> for [UInt8<F>; 4] {
     ) -> Result<Self> {
         let primitive_bits = self.to_bits_be()?;
         let mut rotated_bits = primitive_bits.clone();
-        rotated_bits.rotate_left(positions);
+        let adjusted_positions = 32 - ((positions * 8) % 32);
+        rotated_bits.rotate_left(adjusted_positions);
 
         for i in 0..self.len() {
-            let a = &primitive_bits[(i + positions) % self.len()];
+            let a = &primitive_bits[(i + adjusted_positions) % 32];
             let b = &rotated_bits[i];
             let c = lc!() + a.lc() - b.lc();
             constraint_system.enforce_constraint(lc!(), lc!(), c)?
@@ -99,7 +102,7 @@ impl<F: Field> BitRotationGadget<F> for [UInt8<F>; 4] {
         // to the left while generating the same number of constraints.
         // We compute positions % 8 to avoid subtraction overflow when someone
         // tries to rotate more then 8 positions.
-        self.rotate_left(self.len() - (positions % self.len()), constraint_system)
+        self.rotate_left(32 - (positions % 32), constraint_system)
     }
 }
 
@@ -205,7 +208,7 @@ impl<F: Field> BitShiftGadget<F> for UInt8<F> {
 #[cfg(test)]
 mod tests {
     use crate::gadgets::{
-        traits::{BitRotationGadget, BitShiftGadget},
+        traits::{BitRotationGadget, BitShiftGadget, ByteRotationGadget},
         ConstraintF, UInt8Gadget,
     };
     use ark_r1cs_std::{prelude::AllocVar, R1CSVar};
@@ -390,5 +393,181 @@ mod tests {
 
         assert!(cs.is_satisfied().unwrap());
         assert_eq!(expected_byte, result.value().unwrap());
+    }
+
+    #[test]
+    fn test_not_rotating_a_byte_to_the_left_should_return_the_original_byte() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = bytes.clone();
+
+        let rotated_byte = bytes.rotate_left(0, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
+    }
+
+    #[test]
+    fn test_one_byte_left_rotation() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+        ];
+
+        let rotated_byte = bytes.rotate_left(1, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
+    }
+
+    #[test]
+    fn test_more_than_one_byte_left_rotation() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+        ];
+
+        let rotated_byte = bytes.rotate_left(2, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
+    }
+
+    #[test]
+    fn test_overflowing_byte_left_rotation() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = bytes.clone();
+
+        let rotated_byte = bytes.rotate_left(4, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
+    }
+
+    #[test]
+    fn test_not_rotating_a_byte_to_the_right_should_return_the_original_byte() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+
+        let rotated_byte = bytes.rotate_right(0, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(rotated_byte.value().unwrap(), bytes.value().unwrap())
+    }
+
+    #[test]
+    fn test_one_byte_right_rotation() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+        ];
+
+        let rotated_byte = bytes.rotate_right(1, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
+    }
+
+    #[test]
+    fn test_more_than_one_byte_right_rotation() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+        ];
+
+        let rotated_byte = bytes.rotate_right(2, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
+    }
+
+    #[test]
+    fn test_overflowing_byte_right_rotation() {
+        let cs = ConstraintSystem::<ConstraintF>::new_ref();
+        let bytes = [
+            UInt8Gadget::new_witness(cs.clone(), || Ok(1)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(2)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(3)).unwrap(),
+            UInt8Gadget::new_witness(cs.clone(), || Ok(4)).unwrap(),
+        ];
+        let expected_rotated_bytes = bytes.clone();
+
+        let rotated_byte = bytes.rotate_right(4, cs.clone()).unwrap();
+
+        assert!(cs.is_satisfied().unwrap());
+        assert_eq!(
+            rotated_byte.value().unwrap(),
+            expected_rotated_bytes.value().unwrap()
+        )
     }
 }
