@@ -3,8 +3,6 @@ use ark_ff::Field;
 use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
 use ark_relations::r1cs::ConstraintSystemRef;
 
-use super::UInt8Gadget;
-
 pub trait ToFieldElements<F: Field> {
     fn to_field_elements(&self) -> Result<Vec<F>>;
 }

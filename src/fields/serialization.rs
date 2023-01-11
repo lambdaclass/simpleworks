@@ -25,8 +25,6 @@ mod tests {
     fn test_serialize_field_element() {
         let nonce = ConstraintF::rand(&mut marlin::generate_rand());
 
-        let v = serialize_field_element(nonce).unwrap();
-
-        println!("{v:?}");
+        let v_ = serialize_field_element(nonce).unwrap();
     }
 }

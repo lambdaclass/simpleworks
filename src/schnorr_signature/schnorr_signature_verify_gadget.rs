@@ -66,6 +66,6 @@ where
         )?;
         let obtained_verifier_challenge = ROGadget::evaluate(&b2s_params, &hash_input)?.0;
 
-        obtained_verifier_challenge.is_eq(&verifier_challenge.to_vec())
+        obtained_verifier_challenge.is_eq(&verifier_challenge)
     }
 }

@@ -112,11 +112,11 @@ impl<F: Field> ToFieldElements<F> for Address<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
         let bits_le = self.bytes.to_bits_le()?;
         let mut result = Vec::with_capacity(63 * 8);
-        for boolean_gadget_value in bits_le.iter() {
+        for boolean_gadget_value in &bits_le {
             if boolean_gadget_value.value()? {
-                result.push(F::one())
+                result.push(F::one());
             } else {
-                result.push(F::zero())
+                result.push(F::zero());
             }
         }
 

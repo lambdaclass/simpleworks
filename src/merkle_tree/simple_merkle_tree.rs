@@ -135,11 +135,7 @@ impl SimpleMerkleTree {
         let bits = BitArray::<u8>::from(input);
 
         for bit in bits.iter().by_vals() {
-            if bit {
-                input_vec.push(one)
-            } else {
-                input_vec.push(zero)
-            }
+            input_vec.push(if bit { one } else { zero });
         }
 
         let proof = Proof::<Fr, MultiPC>::deserialize(proof).map_err(|e| anyhow!("{:?}", e))?;
@@ -198,7 +194,6 @@ pub fn check_leave_exists_u8<L: ToBytes>(
         .is_satisfied()
         .map_err(|_e| anyhow!("Error checking if the constrinaints are satisfied"))?;
 
-    println!("Hello world!");
     Ok(is_satisfied)
 }
 
@@ -207,19 +202,6 @@ mod tests {
     use super::super::common::{LeafHash, TwoToOneHash};
     use ark_crypto_primitives::crh::{TwoToOneCRH, CRH};
     use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystem};
-    use bitvec::array::BitArray;
-
-    #[test]
-    fn bit_test() {
-        let bits = BitArray::<u8>::from(254);
-
-        for bit in bits.iter().by_vals() {
-            match bit {
-                false => println!("0"),
-                true => println!("1"),
-            }
-        }
-    }
 
     #[test]
     fn merkle_tree_constraints_soundness() {

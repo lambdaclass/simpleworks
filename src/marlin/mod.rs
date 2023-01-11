@@ -69,20 +69,20 @@ pub fn generate_universal_srs(
 ///
 pub fn generate_proof(
     constraint_system: ConstraintSystemRef,
-    proving_key: ProvingKey,
+    proving_key: &ProvingKey,
     rng: &mut StdRng,
 ) -> Result<MarlinProof> {
-    MarlinInst::prove_from_constraint_system(&proving_key, constraint_system, rng)
+    MarlinInst::prove_from_constraint_system(proving_key, constraint_system, rng)
         .map_err(|e| anyhow!("{:?}", e))
 }
 
 pub fn verify_proof(
-    verifying_key: VerifyingKey,
+    verifying_key: &VerifyingKey,
     public_inputs: &[ConstraintF],
     proof: &MarlinProof,
     rng: &mut StdRng,
 ) -> Result<bool> {
-    MarlinInst::verify(&verifying_key, public_inputs, proof, rng).map_err(|e| anyhow!("{:?}", e))
+    MarlinInst::verify(verifying_key, public_inputs, proof, rng).map_err(|e| anyhow!("{:?}", e))
 }
 
 pub fn generate_proving_and_verifying_keys(

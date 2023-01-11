@@ -1,8 +1,8 @@
 use super::traits::{
     BitRotationGadget, BitShiftGadget, FromBytesGadget, IsWitness, ToFieldElements,
 };
-use anyhow::Result;
-use ark_ff::{BigInteger, Field};
+use anyhow::{anyhow, Result};
+use ark_ff::Field;
 use ark_r1cs_std::{
     prelude::{AllocVar, Boolean},
     uint16::UInt16,
@@ -18,11 +18,11 @@ impl<F: Field> ToFieldElements<F> for UInt16<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
         let bits_le = self.to_bits_le();
         let mut result = Vec::with_capacity(16);
-        for boolean_gadget_value in bits_le.iter() {
+        for boolean_gadget_value in &bits_le {
             if boolean_gadget_value.value()? {
-                result.push(F::one())
+                result.push(F::one());
             } else {
-                result.push(F::zero())
+                result.push(F::zero());
             }
         }
 
@@ -71,10 +71,10 @@ impl<F: Field> BitRotationGadget<F> for UInt16<F> {
         rotated_bits.rotate_left(positions);
 
         for i in 0..16 {
-            let a = &primitive_bits[(i + positions) % 16];
-            let b = &rotated_bits[i];
+            let a = &primitive_bits.get((i + positions) % 16).ok_or_else(|| anyhow!("Error getting element"))?;
+            let b = &rotated_bits.get(i).ok_or_else(|| anyhow!("Error getting element"))?;
             let c = lc!() + a.lc() - b.lc();
-            constraint_system.enforce_constraint(lc!(), lc!(), c)?
+            constraint_system.enforce_constraint(lc!(), lc!(), c)?;
         }
 
         rotated_bits.reverse();
@@ -120,7 +120,7 @@ impl<F: Field> BitShiftGadget<F> for UInt16<F> {
         shifted_bits.reverse();
 
         if positions >= 16 {
-            for c in shifted_bits.iter() {
+            for c in &shifted_bits {
                 constraint_system.enforce_constraint(lc!(), lc!(), c.lc())?;
             }
         } else {
@@ -172,7 +172,7 @@ impl<F: Field> BitShiftGadget<F> for UInt16<F> {
         shifted_bits.reverse();
 
         if positions >= 16 {
-            for c in shifted_bits.iter() {
+            for c in &shifted_bits {
                 constraint_system.enforce_constraint(lc!(), lc!(), c.lc())?;
             }
         } else {
@@ -274,7 +274,7 @@ mod tests {
     fn test_one_left_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(1)).unwrap();
-        let positions_to_shift = 1;
+        let positions_to_shift = 1_i32;
         let expected_byte = byte.value().unwrap() << positions_to_shift;
 
         let result = byte
@@ -289,7 +289,7 @@ mod tests {
     fn test_more_than_one_left_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(1)).unwrap();
-        let positions_to_shift = 2;
+        let positions_to_shift = 2_i32;
         let expected_byte = byte.value().unwrap() << positions_to_shift;
 
         let result = byte
@@ -304,7 +304,7 @@ mod tests {
     fn test_overflow_one_bit_left_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(0b1000_0000_0000_0001)).unwrap();
-        let positions_to_shift = 1;
+        let positions_to_shift = 1_i32;
         let expected_byte = UInt16Gadget::constant(2).value().unwrap();
 
         let result = byte
@@ -319,7 +319,7 @@ mod tests {
     fn test_overflow_all_bits_left_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(1)).unwrap();
-        let positions_to_shift = 16;
+        let positions_to_shift = 16_i32;
         let expected_byte = 0;
 
         let result = byte
@@ -335,7 +335,7 @@ mod tests {
     fn test_one_right_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(2)).unwrap();
-        let positions_to_shift = 1;
+        let positions_to_shift = 1_i32;
         let expected_byte = byte.value().unwrap() >> positions_to_shift;
 
         let result = byte
@@ -350,7 +350,7 @@ mod tests {
     fn test_more_than_one_right_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(4)).unwrap();
-        let positions_to_shift = 2;
+        let positions_to_shift = 2_i32;
         let expected_byte = byte.value().unwrap() >> positions_to_shift;
 
         let result = byte
@@ -365,7 +365,7 @@ mod tests {
     fn test_overflow_one_bit_right_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(1)).unwrap();
-        let positions_to_shift = 1;
+        let positions_to_shift = 1_i32;
         let expected_byte = UInt16Gadget::constant(0).value().unwrap();
 
         let result = byte
@@ -380,7 +380,7 @@ mod tests {
     fn test_overflow_all_bits_right_shift() {
         let cs = ConstraintSystem::<ConstraintF>::new_ref();
         let byte = UInt16Gadget::new_witness(cs.clone(), || Ok(u16::MAX)).unwrap();
-        let positions_to_shift = 16;
+        let positions_to_shift = 16_i32;
         let expected_byte = 0;
 
         let result = byte

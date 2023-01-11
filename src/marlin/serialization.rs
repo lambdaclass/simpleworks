@@ -2,7 +2,7 @@ use super::{MarlinProof, ProvingKey, VerifyingKey};
 use anyhow::{anyhow, Result};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
-pub fn serialize_proof(proof: MarlinProof) -> Result<Vec<u8>> {
+pub fn serialize_proof(proof: &MarlinProof) -> Result<Vec<u8>> {
     let mut bytes_proof = Vec::new();
     proof
         .serialize(&mut bytes_proof)
@@ -16,7 +16,7 @@ pub fn deserialize_proof(bytes_proof: Vec<u8>) -> Result<MarlinProof> {
         .map_err(|e| anyhow!("Error deserializing proof: {e:?}"))
 }
 
-pub fn serialize_verifying_key(verifying_key: VerifyingKey) -> Result<Vec<u8>> {
+pub fn serialize_verifying_key(verifying_key: &VerifyingKey) -> Result<Vec<u8>> {
     let mut bytes_verifying_key = Vec::new();
     verifying_key
         .serialize(&mut bytes_verifying_key)
@@ -30,7 +30,7 @@ pub fn deserialize_verifying_key(bytes_verifying_key: Vec<u8>) -> Result<Verifyi
         .map_err(|e| anyhow!("Error deserializing verifying key: {e:?}"))
 }
 
-pub fn serialize_proving_key(proving_key: ProvingKey) -> Result<Vec<u8>> {
+pub fn serialize_proving_key(proving_key: &ProvingKey) -> Result<Vec<u8>> {
     let mut bytes_proving_key = Vec::new();
     proving_key
         .serialize(&mut bytes_proving_key)
