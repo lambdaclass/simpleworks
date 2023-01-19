@@ -3,8 +3,6 @@ use ark_ff::Field;
 use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
 use ark_relations::r1cs::ConstraintSystemRef;
 
-use super::UInt8Gadget;
-
 pub trait ToFieldElements<F: Field> {
     fn to_field_elements(&self) -> Result<Vec<F>>;
 }
@@ -42,7 +40,7 @@ pub trait FromBytesGadget<F: Field> {
         Self: Sized;
 }
 
-pub trait BitRotationGadget<F: Field> {
+pub trait ByteRotationGadget<F: Field> {
     fn rotate_left(
         &self,
         positions: usize,
@@ -60,7 +58,27 @@ pub trait BitRotationGadget<F: Field> {
         Self: std::marker::Sized;
 }
 
-pub trait BitShiftGadget<F: Field> {
+pub trait BitwiseOperationGadget<F: Field> {
+    fn and(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized + ToBitsGadget<F>;
+
+    fn or(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized + ToBitsGadget<F>;
+
+    fn nand(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized + ToBitsGadget<F>;
+
+    fn nor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized + ToBitsGadget<F>;
+
+    fn xor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized + ToBitsGadget<F>;
+
     fn shift_left(
         &self,
         positions: usize,
@@ -76,9 +94,7 @@ pub trait BitShiftGadget<F: Field> {
     ) -> Result<Self>
     where
         Self: std::marker::Sized;
-}
 
-pub trait ByteRotationGadget<F: Field> {
     fn rotate_left(
         &self,
         positions: usize,

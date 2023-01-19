@@ -198,7 +198,6 @@ pub fn check_leave_exists_u8<L: ToBytes>(
         .is_satisfied()
         .map_err(|_e| anyhow!("Error checking if the constrinaints are satisfied"))?;
 
-    println!("Hello world!");
     Ok(is_satisfied)
 }
 
@@ -209,6 +208,7 @@ mod tests {
     use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystem};
     use bitvec::array::BitArray;
 
+    #[allow(clippy::print_stdout)]
     #[test]
     fn bit_test() {
         let bits = BitArray::<u8>::from(254);

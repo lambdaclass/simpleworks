@@ -10,6 +10,8 @@ mod boolean;
 
 mod field;
 
+mod helpers;
+
 mod poseidon;
 pub use poseidon::poseidon2_hash;
 

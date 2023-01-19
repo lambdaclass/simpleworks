@@ -15,6 +15,7 @@ pub fn deserialize_field_element(bytes_field_element: Vec<u8>) -> Result<Constra
         .map_err(|e| anyhow!("Error deserializing field element: {e:?}"))
 }
 
+#[allow(clippy::print_stdout)]
 #[cfg(test)]
 mod tests {
     use super::serialize_field_element;
