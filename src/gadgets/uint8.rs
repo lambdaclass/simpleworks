@@ -27,9 +27,9 @@ impl<F: Field> ToFieldElements<F> for UInt8<F> {
 impl<F: Field> IsWitness<F> for [UInt8<F>] {}
 
 impl<F: Field> BitwiseOperationGadget<F> for UInt8<F> {
-    fn and(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn and(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le()?,
@@ -40,9 +40,9 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt8<F> {
         Ok(new_value)
     }
 
-    fn nand(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn nand(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le()?,
@@ -53,9 +53,9 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt8<F> {
         Ok(new_value)
     }
 
-    fn nor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn nor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le()?,
@@ -66,9 +66,9 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt8<F> {
         Ok(new_value)
     }
 
-    fn or(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn or(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le()?,
@@ -79,9 +79,9 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt8<F> {
         Ok(new_value)
     }
 
-    fn xor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn xor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le()?,
