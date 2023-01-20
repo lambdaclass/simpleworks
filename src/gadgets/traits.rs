@@ -65,19 +65,19 @@ pub trait BitwiseOperationGadget<F: Field> {
 
     fn or(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>;
+        Self: std::marker::Sized;
 
     fn nand(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>;
+        Self: std::marker::Sized;
 
     fn nor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>;
+        Self: std::marker::Sized;
 
     fn xor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>;
+        Self: std::marker::Sized;
 
     fn shift_left(
         &self,
