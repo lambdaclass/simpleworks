@@ -59,23 +59,23 @@ pub trait ByteRotationGadget<F: Field> {
 }
 
 pub trait BitwiseOperationGadget<F: Field> {
-    fn and(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn and(&self, other_gadget: Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn or(&self, other_gadget: Self) -> Result<Self>
     where
         Self: std::marker::Sized + ToBitsGadget<F>;
 
-    fn or(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn nand(&self, other_gadget: Self) -> Result<Self>
     where
         Self: std::marker::Sized + ToBitsGadget<F>;
 
-    fn nand(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn nor(&self, other_gadget: Self) -> Result<Self>
     where
         Self: std::marker::Sized + ToBitsGadget<F>;
 
-    fn nor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
-    where
-        Self: std::marker::Sized + ToBitsGadget<F>;
-
-    fn xor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn xor(&self, other_gadget: Self) -> Result<Self>
     where
         Self: std::marker::Sized + ToBitsGadget<F>;
 

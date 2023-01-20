@@ -59,65 +59,65 @@ impl<F: Field> FromBytesGadget<F> for UInt128<F> {
 }
 
 impl<F: Field> BitwiseOperationGadget<F> for UInt128<F> {
-    fn and(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn and(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
-            other_gadget.to_bits_le()?,
+            other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.and(&second_bit),
         )?;
         let new_value = UInt128::from_bits_le(&result);
         Ok(new_value)
     }
 
-    fn nand(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn nand(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
-            other_gadget.to_bits_le()?,
+            other_gadget.to_bits_le(),
             |first_bit, second_bit| Ok(first_bit.and(&second_bit)?.not()),
         )?;
         let new_value = UInt128::from_bits_le(&result);
         Ok(new_value)
     }
 
-    fn nor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn nor(&self, other_gadget: Self) -> Result<Self>
     where
         Self: std::marker::Sized + ToBitsGadget<F>,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
-            other_gadget.to_bits_le()?,
+            other_gadget.to_bits_le(),
             |first_bit, second_bit| Ok(first_bit.or(&second_bit)?.not()),
         )?;
         let new_value = UInt128::from_bits_le(&result);
         Ok(new_value)
     }
 
-    fn or(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn or(&self, other_gadget: Self) -> Result<Self>
     where
         Self: std::marker::Sized + ToBitsGadget<F>,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
-            other_gadget.to_bits_le()?,
+            other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.or(&second_bit),
         )?;
         let new_value = UInt128::from_bits_le(&result);
         Ok(new_value)
     }
 
-    fn xor(&self, other_gadget: impl BitwiseOperationGadget<F> + ToBitsGadget<F>) -> Result<Self>
+    fn xor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
-            other_gadget.to_bits_le()?,
+            other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.xor(&second_bit),
         )?;
         let new_value = UInt128::from_bits_le(&result);
