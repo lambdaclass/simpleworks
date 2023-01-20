@@ -87,7 +87,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt128<F> {
 
     fn nor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
@@ -100,7 +100,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt128<F> {
 
     fn or(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),

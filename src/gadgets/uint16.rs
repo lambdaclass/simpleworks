@@ -113,7 +113,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt16<F> {
 
     fn xor(&self, other_gadget: Self) -> Result<Self>
     where
-        Self: std::marker::Sized + ToBitsGadget<F>,
+        Self: std::marker::Sized,
     {
         let result = zip_bits_and_apply(
             self.to_bits_le(),
