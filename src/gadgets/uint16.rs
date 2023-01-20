@@ -29,16 +29,6 @@ impl<F: Field> ToFieldElements<F> for UInt16<F> {
     }
 }
 
-// impl<F: Field> ToBitsGadget<F> for UInt16<F> {
-//     fn to_bits_be(&self) -> Result<Vec<Boolean<F>>, SynthesisError> {
-//         self.to_bits_be()
-//     }
-
-//     fn to_bits_le(&self) -> Result<Vec<Boolean<F>>, SynthesisError> {
-//         Ok(self.to_bits_le())
-//     }
-// }
-
 impl<F: Field> FromBytesGadget<F> for UInt16<F> {
     fn from_bytes_le(bytes: &[UInt8<F>]) -> Result<Self>
     where
