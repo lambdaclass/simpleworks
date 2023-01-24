@@ -1,12 +1,12 @@
 use anyhow::{anyhow, Result};
-use ark_crypto_primitives::crh::pedersen;
 use ark_crypto_primitives::{
-    crh::injective_map::{PedersenCRHCompressor, TECompressor},
-    CRH,
+    crh::{
+        injective_map::{PedersenCRHCompressor, TECompressor},
+        pedersen, CRHScheme,
+    },
+    sponge::{poseidon::PoseidonSponge, CryptographicSponge, FieldBasedCryptographicSponge},
 };
 use ark_ed_on_bls12_377::{EdwardsProjective, Fq};
-use ark_sponge::poseidon::PoseidonSponge;
-use ark_sponge::{CryptographicSponge, FieldBasedCryptographicSponge};
 
 pub mod helpers;
 
@@ -30,7 +30,7 @@ pub fn pedersen_hash(input: &[u8]) -> Result<Fq> {
 type PoseidonHash = PoseidonSponge<Fq>;
 
 pub fn poseidon2_hash(input: &[u8]) -> Result<Fq> {
-    let sponge_params = helpers::poseidon_parameters_for_test()?;
+    let sponge_params = helpers::poseidon_parameters_for_test::<Fq>()?;
 
     let mut native_sponge = PoseidonHash::new(&sponge_params);
 
