@@ -19,7 +19,7 @@ pub fn deserialize_field_element(bytes_field_element: Vec<u8>) -> Result<Constra
 #[cfg(test)]
 mod tests {
     use super::serialize_field_element;
-    use crate::{fields::ConstraintF};
+    use crate::fields::ConstraintF;
     use ark_ff::UniformRand;
 
     #[test]
