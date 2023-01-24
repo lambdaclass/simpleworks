@@ -1,9 +1,9 @@
 use anyhow::{anyhow, Result};
+use ark_crypto_primitives::sponge::poseidon::PoseidonConfig;
 use ark_ff::PrimeField;
-use ark_sponge::poseidon::PoseidonParameters;
 
 /// Generate default parameters (bls381-fr-only) for alpha = 17, state-size = 8
-pub fn poseidon_parameters_for_test<F: PrimeField>() -> Result<PoseidonParameters<F>> {
+pub(crate) fn poseidon_parameters_for_test<F: PrimeField>() -> Result<PoseidonConfig<F>> {
     let alpha = 17;
     let mds = vec![
         vec![
@@ -572,11 +572,15 @@ pub fn poseidon_parameters_for_test<F: PrimeField>() -> Result<PoseidonParameter
     let full_rounds = 8;
     let total_rounds = 37;
     let partial_rounds = total_rounds - full_rounds;
-    Ok(PoseidonParameters::new(
+    let capacity = 1;
+    let rate = 2;
+    Ok(PoseidonConfig {
         full_rounds,
         partial_rounds,
         alpha,
-        mds,
         ark,
-    ))
+        mds,
+        rate,
+        capacity,
+    })
 }

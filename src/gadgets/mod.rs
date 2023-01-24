@@ -1,3 +1,4 @@
+use crate::fields::ConstraintF;
 use ark_r1cs_std::{
     fields::fp::FpVar, uint128::UInt128, uint16::UInt16, uint32::UInt32, uint64::UInt64,
     uint8::UInt8,
@@ -22,8 +23,6 @@ mod uint64;
 mod uint8;
 
 pub mod traits;
-
-pub type ConstraintF = ark_ed_on_bls12_377::Fq;
 
 pub type UInt8Gadget = UInt8<ConstraintF>;
 pub type UInt16Gadget = UInt16<ConstraintF>;
