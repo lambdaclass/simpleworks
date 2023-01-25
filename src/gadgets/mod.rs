@@ -15,6 +15,9 @@ mod helpers;
 mod poseidon;
 pub use poseidon::poseidon2_hash;
 
+use self::int8::Int8;
+
+mod int8;
 mod uint128;
 mod uint16;
 mod uint32;
@@ -30,5 +33,6 @@ pub type UInt16Gadget = UInt16<ConstraintF>;
 pub type UInt32Gadget = UInt32<ConstraintF>;
 pub type UInt64Gadget = UInt64<ConstraintF>;
 pub type UInt128Gadget = UInt128<ConstraintF>;
+pub type Int8Gadget = Int8<ConstraintF>;
 pub type AddressGadget = Address<ConstraintF>;
 pub type FieldGadget = FpVar<ConstraintF>;
