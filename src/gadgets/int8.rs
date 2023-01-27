@@ -332,13 +332,20 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
         Self: std::marker::Sized,
     {
         let primitive_bits = self.to_bits_be()?;
+        let msb = primitive_bits
+            .get(0)
+            .ok_or("Could not parse the bits correcly")
+            .map_err(|_e| SynthesisError::Unsatisfiable)?;
         let shifted_value = Int8::<F>::new_witness(constraint_system.clone(), || {
             let position_as_u32: u32 = positions
                 .try_into()
                 .map_err(|_e| SynthesisError::Unsatisfiable)?;
             let (shifted_value, shift_overflowed) = self.value()?.overflowing_shr(position_as_u32);
             if shift_overflowed {
-                Ok(0)
+                match msb.value()? {
+                    true => Ok(-1_i8),
+                    false => Ok(0_i8),
+                }
             } else {
                 Ok(shifted_value)
             }
@@ -346,13 +353,14 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
         let shifted_bits = shifted_value.to_bits_be()?;
 
         if positions >= 8 {
+            // Check that the first positions primitive bits are the same as the msb.
             for c in shifted_bits.iter() {
-                constraint_system.enforce_constraint(lc!(), lc!(), c.lc())?;
+                constraint_system.enforce_constraint(lc!(), lc!(), c.lc() - msb.lc())?;
             }
         } else {
-            // Check that the first positions primitive bits are 0s.
+            // Check that the first positions primitive bits are the same as the msb.
             shifted_bits.iter().take(positions).try_for_each(|c| {
-                constraint_system.enforce_constraint(lc!(), lc!(), c.lc())?;
+                constraint_system.enforce_constraint(lc!(), lc!(), c.lc() - msb.lc())?;
                 Ok::<_, anyhow::Error>(())
             })?;
             // Check that the last len - positions bits are the first positions bits of the primitive bits.
