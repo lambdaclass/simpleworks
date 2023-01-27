@@ -1,5 +1,9 @@
 use std::borrow::Borrow;
 
+use super::{
+    helpers::zip_bits_and_apply,
+    traits::{BitwiseOperationGadget, IsWitness},
+};
 use anyhow::Result;
 use ark_ff::Field;
 use ark_r1cs_std::{
@@ -11,11 +15,6 @@ use ark_r1cs_std::{
 use ark_relations::{
     lc,
     r1cs::{ConstraintSystemRef, Namespace, SynthesisError},
-};
-
-use super::{
-    helpers::zip_bits_and_apply,
-    traits::{BitwiseOperationGadget, IsWitness},
 };
 
 #[derive(Clone, Debug)]
@@ -97,9 +96,9 @@ impl<F: Field> Int8<F> {
         }
     }
 
-    pub fn from_bits_le(bits: &[Boolean<F>]) -> Self {
+    pub fn from_bits_le(bits: &[Boolean<F>]) -> Result<Self> {
         assert_eq!(bits.len(), 8, "Invalid array length, should be 8");
-        let bits = <&[Boolean<F>; 8]>::try_from(bits).unwrap().clone();
+        let bits = <&[Boolean<F>; 8]>::try_from(bits)?.clone();
 
         let mut value = Some(0_i8);
         for (i, b) in bits.iter().enumerate() {
@@ -109,7 +108,7 @@ impl<F: Field> Int8<F> {
             }
         }
 
-        Self { value, bits }
+        Ok(Self { value, bits })
     }
 }
 
@@ -183,7 +182,7 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
             other_gadget.to_bits_le()?,
             |first_bit, second_bit| first_bit.and(&second_bit),
         )?;
-        let new_value = Int8::from_bits_le(&result);
+        let new_value = Int8::from_bits_le(&result)?;
         Ok(new_value)
     }
 
@@ -196,7 +195,7 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
             other_gadget.to_bits_le()?,
             |first_bit, second_bit| Ok(first_bit.and(&second_bit)?.not()),
         )?;
-        let new_value = Int8::from_bits_le(&result);
+        let new_value = Int8::from_bits_le(&result)?;
         Ok(new_value)
     }
 
@@ -209,7 +208,7 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
             other_gadget.to_bits_le()?,
             |first_bit, second_bit| Ok(first_bit.or(&second_bit)?.not()),
         )?;
-        let new_value = Int8::from_bits_le(&result);
+        let new_value = Int8::from_bits_le(&result)?;
         Ok(new_value)
     }
 
@@ -222,7 +221,7 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
             other_gadget.to_bits_le()?,
             |first_bit, second_bit| first_bit.xor(&second_bit),
         )?;
-        let new_value = Int8::from_bits_le(&result);
+        let new_value = Int8::from_bits_le(&result)?;
         Ok(new_value)
     }
 
@@ -235,7 +234,7 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
             other_gadget.to_bits_le()?,
             |first_bit, second_bit| first_bit.or(&second_bit),
         )?;
-        let new_value = Int8::from_bits_le(&result);
+        let new_value = Int8::from_bits_le(&result)?;
         Ok(new_value)
     }
 
@@ -259,7 +258,7 @@ impl<F: Field> BitwiseOperationGadget<F> for Int8<F> {
         }
 
         rotated_bits.reverse();
-        Ok(Int8::<F>::from_bits_le(&rotated_bits))
+        Int8::<F>::from_bits_le(&rotated_bits)
     }
 
     fn rotate_right(
