@@ -1,8 +1,9 @@
-use super::helpers::zip_bits_and_apply;
+use super::helpers;
 use super::traits::{
-    ArithmeticGadget, BitManipulationGadget, BitwiseOperationGadget, FromBytesGadget, IsWitness,
-    ToFieldElements,
+    ArithmeticGadget, BitManipulationGadget, BitwiseOperationGadget, ComparisonGadget,
+    FromBytesGadget, IsWitness, ToFieldElements,
 };
+use super::Comparison;
 use anyhow::{ensure, Result};
 use ark_ff::{Field, PrimeField};
 use ark_r1cs_std::{
@@ -68,7 +69,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt64<F> {
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.and(&second_bit),
@@ -81,7 +82,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt64<F> {
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| Ok(first_bit.and(&second_bit)?.not()),
@@ -94,7 +95,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt64<F> {
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| Ok(first_bit.or(&second_bit)?.not()),
@@ -107,7 +108,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt64<F> {
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.or(&second_bit),
@@ -120,7 +121,7 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt64<F> {
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.xor(&second_bit),
@@ -357,6 +358,20 @@ impl<F: Field + PrimeField> ArithmeticGadget<F> for UInt64<F> {
             )?;
         }
         Ok(product)
+    }
+}
+
+impl<F: Field> ComparisonGadget<F> for UInt64<F> {
+    fn compare(
+        &self,
+        gadget_to_compare: &Self,
+        comparison: Comparison,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Boolean<F>>
+    where
+        Self: std::marker::Sized,
+    {
+        helpers::compare_ord(self, gadget_to_compare, comparison, constraint_system)
     }
 }
 
