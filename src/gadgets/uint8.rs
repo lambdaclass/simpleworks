@@ -316,11 +316,11 @@ impl<F: Field> ArithmeticGadget<F> for UInt8<F> {
                 &aux.shift_left(1, constraint_system.clone())?,
             )?;
 
-            // FIXME USE REAL COMPARISON
-            let is_greater = Boolean::constant(divisor.value()? > aux.value()?);
+            let is_greater =
+                divisor.compare(&aux, Comparison::GreaterThan, constraint_system.clone())?;
 
             quotient = Self::conditionally_select(&is_greater, &quotient, &quotient.or(&one)?)?;
-            aux = if is_greater == Boolean::TRUE {
+            aux = if is_greater.value()? {
                 aux
             } else {
                 aux.sub(divisor)?
