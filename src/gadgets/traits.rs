@@ -1,7 +1,9 @@
 use anyhow::{anyhow, Result};
 use ark_ff::Field;
-use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
+use ark_r1cs_std::{prelude::Boolean, uint8::UInt8, ToBitsGadget, ToBytesGadget};
 use ark_relations::r1cs::ConstraintSystemRef;
+
+use super::Comparison;
 
 pub trait ToFieldElements<F: Field> {
     fn to_field_elements(&self) -> Result<Vec<F>>;
@@ -128,6 +130,17 @@ pub trait ArithmeticGadget<F: Field> {
         Self: std::marker::Sized;
 
     fn div(&self, divisor: &Self, constraint_system: ConstraintSystemRef<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+}
+
+pub trait ComparisonGadget<F: Field> {
+    fn compare(
+        &self,
+        gadget_to_compare: &Self,
+        comparison: Comparison,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Boolean<F>>
     where
         Self: std::marker::Sized;
 }
