@@ -1,7 +1,11 @@
-use super::helpers::zip_bits_and_apply;
-use super::traits::{BitwiseOperationGadget, FromBytesGadget, IsWitness, ToFieldElements};
-use anyhow::Result;
-use ark_ff::Field;
+use super::helpers;
+use super::traits::{
+    ArithmeticGadget, BitManipulationGadget, BitwiseOperationGadget, ComparisonGadget,
+    FromBytesGadget, IsWitness, ToFieldElements,
+};
+use super::Comparison;
+use anyhow::{ensure, Result};
+use ark_ff::{Field, PrimeField};
 use ark_r1cs_std::{
     prelude::{AllocVar, Boolean},
     uint32::UInt32,
@@ -12,6 +16,8 @@ use ark_relations::{
     lc,
     r1cs::{ConstraintSystemRef, SynthesisError},
 };
+
+use ark_r1cs_std::select::CondSelectGadget;
 
 impl<F: Field> ToFieldElements<F> for UInt32<F> {
     fn to_field_elements(&self) -> Result<Vec<F>> {
@@ -59,11 +65,11 @@ impl<F: Field> FromBytesGadget<F> for UInt32<F> {
 }
 
 impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
-    fn and(&self, other_gadget: Self) -> Result<Self>
+    fn and(&self, other_gadget: &Self) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.and(&second_bit),
@@ -72,11 +78,11 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
         Ok(new_value)
     }
 
-    fn nand(&self, other_gadget: Self) -> Result<Self>
+    fn nand(&self, other_gadget: &Self) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| Ok(first_bit.and(&second_bit)?.not()),
@@ -85,11 +91,11 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
         Ok(new_value)
     }
 
-    fn nor(&self, other_gadget: Self) -> Result<Self>
+    fn nor(&self, other_gadget: &Self) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| Ok(first_bit.or(&second_bit)?.not()),
@@ -98,11 +104,11 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
         Ok(new_value)
     }
 
-    fn or(&self, other_gadget: Self) -> Result<Self>
+    fn or(&self, other_gadget: &Self) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.or(&second_bit),
@@ -111,11 +117,11 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
         Ok(new_value)
     }
 
-    fn xor(&self, other_gadget: Self) -> Result<Self>
+    fn xor(&self, other_gadget: &Self) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
-        let result = zip_bits_and_apply(
+        let result = helpers::zip_bits_and_apply(
             self.to_bits_le(),
             other_gadget.to_bits_le(),
             |first_bit, second_bit| first_bit.xor(&second_bit),
@@ -123,7 +129,9 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
         let new_value = UInt32::from_bits_le(&result);
         Ok(new_value)
     }
+}
 
+impl<F: Field> BitManipulationGadget<F> for UInt32<F> {
     fn rotate_left(
         &self,
         positions: usize,
@@ -262,9 +270,114 @@ impl<F: Field> BitwiseOperationGadget<F> for UInt32<F> {
     }
 }
 
+impl<F: Field + PrimeField> ArithmeticGadget<F> for UInt32<F> {
+    fn add(&self, addend: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        let result = Self::addmany(&[self.clone(), addend.clone()])?;
+        Ok(result)
+    }
+
+    fn sub(&self, subtrahend: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        ensure!(
+            self.value()? >= subtrahend.value()?,
+            "Subtraction underflow"
+        );
+
+        let minuend_as_augend = Self::from_bits_le(
+            &(self
+                .to_bits_le()
+                .into_iter()
+                .map(|bit| bit.not())
+                .collect::<Vec<Boolean<F>>>()),
+        );
+        let subtrahend_as_addend = subtrahend.to_bits_le();
+
+        let subtrahend_as_addend_var = Self::from_bits_le(&subtrahend_as_addend);
+
+        let partial_result = Self::addmany(&[minuend_as_augend, subtrahend_as_addend_var])?;
+
+        let difference = Self::from_bits_le(
+            &partial_result
+                .to_bits_le()
+                .into_iter()
+                .map(|bit| bit.not())
+                .collect::<Vec<Boolean<F>>>(),
+        );
+
+        Ok(difference)
+    }
+
+    fn div(&self, divisor: &Self, constraint_system: ConstraintSystemRef<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        ensure!(divisor.value()? != 0_u32, "attempt to divide by zero");
+        let mut quotient = self.clone();
+        let mut aux = Self::new_witness(constraint_system.clone(), || Ok(0))?;
+
+        let one = Self::new_constant(constraint_system.clone(), 1)?;
+
+        for dividend_bit in self.to_bits_le().iter().rev() {
+            quotient = quotient.shift_left(1, constraint_system.clone())?;
+            aux = Self::conditionally_select(
+                dividend_bit,
+                &aux.shift_left(1, constraint_system.clone())?.or(&one)?,
+                &aux.shift_left(1, constraint_system.clone())?,
+            )?;
+
+            let is_greater =
+                divisor.compare(&aux, Comparison::GreaterThan, constraint_system.clone())?;
+
+            quotient = Self::conditionally_select(&is_greater, &quotient, &quotient.or(&one)?)?;
+            aux = if is_greater.value()? {
+                aux
+            } else {
+                aux.sub(divisor)?
+            }
+        }
+        Ok(quotient)
+    }
+
+    fn mul(&self, multiplicand: &Self, constraint_system: ConstraintSystemRef<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        let mut product = Self::new_witness(constraint_system.clone(), || Ok(0))?;
+        for (i, multiplier_bit) in self.to_bits_le().iter().enumerate() {
+            // If the multiplier bit is a 1.
+            let addend = multiplicand.shift_left(i, constraint_system.clone())?;
+            product = Self::conditionally_select(
+                multiplier_bit,
+                &Self::addmany(&[product.clone(), addend])?,
+                &product,
+            )?;
+        }
+        Ok(product)
+    }
+}
+
+impl<F: Field> ComparisonGadget<F> for UInt32<F> {
+    fn compare(
+        &self,
+        gadget_to_compare: &Self,
+        comparison: Comparison,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Boolean<F>>
+    where
+        Self: std::marker::Sized,
+    {
+        helpers::compare_ord(self, gadget_to_compare, comparison, constraint_system)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::gadgets::{traits::BitwiseOperationGadget, ConstraintF, UInt32Gadget};
+    use crate::gadgets::{traits::BitManipulationGadget, ConstraintF, UInt32Gadget};
     use ark_r1cs_std::{prelude::AllocVar, R1CSVar};
     use ark_relations::r1cs::ConstraintSystem;
 
