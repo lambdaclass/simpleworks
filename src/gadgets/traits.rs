@@ -1,7 +1,9 @@
 use anyhow::{anyhow, Result};
 use ark_ff::Field;
-use ark_r1cs_std::{uint8::UInt8, ToBitsGadget, ToBytesGadget};
+use ark_r1cs_std::{prelude::Boolean, uint8::UInt8, ToBitsGadget, ToBytesGadget};
 use ark_relations::r1cs::ConstraintSystemRef;
+
+use super::Comparison;
 
 pub trait ToFieldElements<F: Field> {
     fn to_field_elements(&self) -> Result<Vec<F>>;
@@ -40,7 +42,7 @@ pub trait FromBytesGadget<F: Field> {
         Self: Sized;
 }
 
-pub trait ByteRotationGadget<F: Field> {
+pub trait ByteManipulationGadget<F: Field> {
     fn rotate_left(
         &self,
         positions: usize,
@@ -58,27 +60,7 @@ pub trait ByteRotationGadget<F: Field> {
         Self: std::marker::Sized;
 }
 
-pub trait BitwiseOperationGadget<F: Field> {
-    fn and(&self, other_gadget: Self) -> Result<Self>
-    where
-        Self: std::marker::Sized;
-
-    fn or(&self, other_gadget: Self) -> Result<Self>
-    where
-        Self: std::marker::Sized;
-
-    fn nand(&self, other_gadget: Self) -> Result<Self>
-    where
-        Self: std::marker::Sized;
-
-    fn nor(&self, other_gadget: Self) -> Result<Self>
-    where
-        Self: std::marker::Sized;
-
-    fn xor(&self, other_gadget: Self) -> Result<Self>
-    where
-        Self: std::marker::Sized;
-
+pub trait BitManipulationGadget<F: Field> {
     fn shift_left(
         &self,
         positions: usize,
@@ -108,6 +90,57 @@ pub trait BitwiseOperationGadget<F: Field> {
         positions: usize,
         constraint_system: ConstraintSystemRef<F>,
     ) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+}
+
+pub trait BitwiseOperationGadget<F: Field> {
+    fn and(&self, other_gadget: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn or(&self, other_gadget: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn nand(&self, other_gadget: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn nor(&self, other_gadget: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn xor(&self, other_gadget: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+}
+
+pub trait ArithmeticGadget<F: Field> {
+    fn add(&self, addend: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn sub(&self, subtrahend: &Self) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn mul(&self, multiplicand: &Self, constraint_system: ConstraintSystemRef<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+
+    fn div(&self, divisor: &Self, constraint_system: ConstraintSystemRef<F>) -> Result<Self>
+    where
+        Self: std::marker::Sized;
+}
+
+pub trait ComparisonGadget<F: Field> {
+    fn compare(
+        &self,
+        gadget_to_compare: &Self,
+        comparison: Comparison,
+        constraint_system: ConstraintSystemRef<F>,
+    ) -> Result<Boolean<F>>
     where
         Self: std::marker::Sized;
 }

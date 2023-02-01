@@ -24,6 +24,7 @@ mod uint8;
 pub mod traits;
 
 pub type ConstraintF = ark_ed_on_bls12_377::Fq;
+pub type Comparison = helpers::Comparison;
 
 pub type UInt8Gadget = UInt8<ConstraintF>;
 pub type UInt16Gadget = UInt16<ConstraintF>;
