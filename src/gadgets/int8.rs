@@ -344,17 +344,16 @@ impl<F: Field> ArithmeticGadget<F> for Int8<F> {
 
         let one = Self::new_constant(constraint_system.clone(), 1)?;
 
-        let dividend_absolute_value = if dividend_sign.value()? {
-            helpers::to_absolute_value(self, constraint_system.clone())?
-        } else {
-            self.clone()
-        };
-
-        let divisor_absolute_value = if divisor_sign.value()? {
-            helpers::to_absolute_value(divisor, constraint_system.clone())?
-        } else {
-            divisor.clone()
-        };
+        let dividend_absolute_value = Self::conditionally_select(
+            &dividend_sign,
+            &helpers::to_absolute_value(self, constraint_system.clone())?,
+            self,
+        )?;
+        let divisor_absolute_value = Self::conditionally_select(
+            &divisor_sign,
+            &helpers::to_absolute_value(divisor, constraint_system.clone())?,
+            divisor,
+        )?;
 
         for dividend_bit in dividend_absolute_value.to_bits_be()? {
             quotient = quotient.shift_left(1, constraint_system.clone())?;
