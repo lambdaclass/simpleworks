@@ -227,6 +227,22 @@ impl<F: Field> ToFieldElements<F> for u128 {
     }
 }
 
+impl<F: Field> ToFieldElements<F> for i8 {
+    fn to_field_elements(&self) -> Result<Vec<F>> {
+        let field_elements = (0_i8..8_i8)
+            .into_iter()
+            .map(|bit_index| {
+                if self >> bit_index & 1 == 1 {
+                    F::one()
+                } else {
+                    F::zero()
+                }
+            })
+            .collect::<Vec<F>>();
+        Ok(field_elements)
+    }
+}
+
 impl<F: Field> ToFieldElements<F> for [u8; 63] {
     fn to_field_elements(&self) -> Result<Vec<F>> {
         let mut field_elements = Vec::with_capacity(63 * 8);
@@ -382,6 +398,58 @@ mod test {
         // Little endian
         let mut expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::zero(); 127];
         expected_field_elements.extend_from_slice(&[ConstraintF::one()]);
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_i8_to_field_elements() {
+        let number = i8::MAX;
+        let mut expected_field_elements: Vec<ConstraintF> = vec![ConstraintF::one(); 7];
+        expected_field_elements.push(ConstraintF::zero());
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_i8_positive_to_field_elements_is_little_endian() {
+        let number = 64_i8;
+        let expected_field_elements: Vec<ConstraintF> = vec![
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::zero(),
+        ];
+
+        assert_eq!(
+            expected_field_elements,
+            ToFieldElements::<ConstraintF>::to_field_elements(&number).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_i8_negative_to_field_elements_is_little_endian() {
+        let number = -64_i8;
+        let expected_field_elements: Vec<ConstraintF> = vec![
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::zero(),
+            ConstraintF::one(),
+            ConstraintF::one(),
+        ];
 
         assert_eq!(
             expected_field_elements,

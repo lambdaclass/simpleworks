@@ -1,11 +1,14 @@
 use anyhow::{anyhow, Result};
 use ark_ff::Field;
+use ark_r1cs_std::ToBitsGadget;
 use ark_r1cs_std::{
     prelude::{AllocVar, Boolean},
     select::CondSelectGadget,
     R1CSVar,
 };
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
+
+use super::{int8::Int8, traits::ArithmeticGadget};
 
 pub enum Comparison {
     GreaterThan,
@@ -70,4 +73,39 @@ where
         &false_witness,
     )
     .map_err(|error| anyhow!(error))
+}
+
+pub(crate) fn to_absolute_value<F>(
+    negative_number: &Int8<F>,
+    constraint_system: ConstraintSystemRef<F>,
+) -> Result<Int8<F>>
+where
+    F: Field,
+{
+    let one = Int8::new_constant(constraint_system, 1)?;
+    let a = negative_number.sub(&one)?;
+    let a = a
+        .to_bits_le()?
+        .into_iter()
+        .map(|bit| bit.not())
+        .collect::<Vec<Boolean<F>>>();
+
+    Int8::from_bits_le(&a)
+}
+
+pub(crate) fn to_two_complement<F>(
+    positive_number: &Int8<F>,
+    constraint_system: ConstraintSystemRef<F>,
+) -> Result<Int8<F>>
+where
+    F: Field,
+{
+    let one = Int8::new_constant(constraint_system, 1)?;
+    let a = positive_number
+        .to_bits_le()?
+        .into_iter()
+        .map(|bit| bit.not())
+        .collect::<Vec<Boolean<F>>>();
+    let a = Int8::from_bits_le(&a)?;
+    a.add(&one)
 }
