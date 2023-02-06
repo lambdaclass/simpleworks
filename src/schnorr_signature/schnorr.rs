@@ -199,3 +199,23 @@ impl<ConstraintF: Field, C: ProjectiveCurve + ToConstraintField<ConstraintF>>
         self.generator.into_projective().to_field_elements()
     }
 }
+
+mod schnorr_tests {
+    use ark_crypto_primitives::SignatureScheme;
+    use ark_ec::{AffineCurve, CurveCycle, ProjectiveCurve};
+    use ark_std::test_rng;
+
+    use crate::gadgets::ConstraintF;
+
+    use super::{Parameters, Schnorr};
+
+    #[test]
+    fn sign_and_verify_message() {
+        let a = test_rng();
+        let parameters = Schnorr::setup(&mut a).unwrap();
+        let (_, keys) = Schnorr::keygen(&parameters, &mut a).unwrap();
+        let message = "Test message".as_bytes();
+        let signature = Schnorr::sign(&parameters, keys.secret_key, message, &mut a).unwrap();
+        assert!(Schnorr::verify(&parameters, keys.secret_key, message, &signature).unwrap())
+    }
+}
