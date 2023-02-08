@@ -12,6 +12,7 @@ use blake2::Blake2s;
 use digest::Digest;
 
 use derivative::Derivative;
+use serde::{Deserialize, Serialize};
 
 pub struct Schnorr<C: ProjectiveCurve> {
     _group: PhantomData<C>,
@@ -39,7 +40,7 @@ impl<C: ProjectiveCurve> ToBytes for SecretKey<C> {
     }
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct Signature<C: ProjectiveCurve> {
     pub prover_response: C::ScalarField,
     pub verifier_challenge: [u8; 32],
@@ -57,7 +58,6 @@ where
     fn setup<R: Rng>(_rng: &mut R) -> Result<Self::Parameters, Error> {
         let salt = None;
         let generator = C::prime_subgroup_generator().into();
-
         Ok(Parameters { generator, salt })
     }
 
